@@ -215,14 +215,14 @@ def wiki_decl(soup):
             break
 
         if on_definitions(current_elem):
-            defns = extract_defns(current_elem)
+            defns.extend(extract_defns(current_elem))
 
         if on_new_subsection(current_elem):
             type_subsection = get_subsection_type(current_elem)
             # TODO : Implement
             print("SECTION FOUND: " + section_codes[type_subsection])
             if type_subsection == DECL:
-                decls = extract_decl(current_elem)
+                decls.extend(extract_decl(current_elem))
 
     print("\nDefinitions:")
     for line in defns:
