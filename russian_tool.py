@@ -1,5 +1,8 @@
 import requests
 import sys
+import re
+
+freq_file = open("frequency.txt", "r")
 
 # Oooooo magic numbers :o
 DECL = 1001
@@ -15,8 +18,8 @@ section_codes = { DECL : "DECL",
 url = ''
 
 if len(sys.argv) > 1:
-    word = sys.argv[1]
-    url = 'https://en.wiktionary.org/wiki/' + word
+    query_word = sys.argv[1]
+    url = 'https://en.wiktionary.org/wiki/' + query_word
 
 url_google = 'https://www.google.com/'
 url_open_sister = 'https://en.openrussian.org/ru/сестра'
@@ -233,3 +236,69 @@ def wiki_decl(soup):
         print("\t" + line)
 
 wiki_decl(soup_outer)
+
+# Given a string and an index in it, return the whole line containing
+# that character corresponding to that index
+def get_line(string, ind):
+    start_ind = ind
+    end_ind = ind
+    while string[start_ind] != '\n':
+        start_ind -= 1
+    start_ind += 1
+    if string[start_ind] == '\t':
+        start_ind += 1
+    while string[end_ind] != '\n':
+        end_ind += 1
+    return string[start_ind:end_ind]
+
+file_str = freq_file.read()
+
+freq_matches = {}
+
+#print("Frequency file matches:")
+for match in re.finditer(query_word, file_str):
+    line = get_line(file_str, match.start())
+
+    num_split = line.split('.')
+    number = num_split[0]
+
+    word_split = line.split('\t')
+    word = word_split[1].split(' ')[0]
+
+    freq_matches[word] = number
+    
+    #print(line + " " + str(number) + " " + word)
+
+print()
+elem_found = False
+if query_word in freq_matches:
+    elem_found = True
+    print("Frequency list match found:")
+    print('\t' + query_word + " (freq " + str(freq_matches[query_word]) + ")")
+else:
+    print("Query word not found on frequency list")
+
+print()
+
+print("Other honorable mentions from the frequency list:")
+for key in freq_matches:
+    if key != query_word:
+        print('\t' + key + " (freq " + str(freq_matches[key]) + ")")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+freq_file.close()
