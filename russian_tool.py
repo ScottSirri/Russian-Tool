@@ -1,6 +1,11 @@
 import requests
 import sys
 
+DECL = 1001
+CONJ = 1002
+SIMILAR = 1003
+OTHER = 1004
+
 url = ''
 
 if len(sys.argv) > 1:
@@ -88,6 +93,32 @@ def extract_defns(elem):
 
     return lines
 
+def get_subsection_type(elem):
+    h4_elems = elem.find_all("h4")
+    for elem in h4_elems:
+        if not hasattr(elem, 'attrs'):
+            continue
+        if 'id' in elem.attrs:
+            elem_id = elem['id']
+
+            if "Declension" in elem_id:
+                return DECL
+            elif "Conjugation" in elem_id:
+                return CONJ
+            elif "Related" in elem_id or "Derived" in elem_id:
+                return SIMILAR
+            else:
+                return OTHER
+
+def extract_decl(elem):
+    print("called extract_decl")
+
+def extract_conj(elem):
+    print("called extract_conj")
+
+def extract_similar(elem):
+    print("called extract_similar")
+
 # Returns the definitions, declensions, conjugations, and related terms
 # (as applicable) in the Russian section of the given soup element.
 def wiki_decl(soup):
@@ -125,7 +156,8 @@ def wiki_decl(soup):
             defns = extract_defns(current_elem)
 
         if on_new_subsection(current_elem):
+            type_subsection = get_subsection_type(current_elem)
             # Handle this
-            print()
+            print("TYPE: " + str(type_subsection))
 
 wiki_decl(soup_outer)
