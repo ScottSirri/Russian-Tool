@@ -55,29 +55,48 @@ def open_decl(soup):
         for decl in decls:
             print(decl.get_text())
 
+
 def wiki_decl(soup):
-    russian_sec = soup.find_all(id="Russian")
-    if len(russian_sec) < 1:
-        print("Page not found")
+
+    russian_sec_search = soup.find_all(id="Russian")
+
+    if len(russian_sec_search) < 1:
+        print("Russian section not found")
         return
-    elem = russian_sec[0].parent
+
+    current_elem = russian_sec_search[0].parent
+
     while True:
-        if elem == None: # or elem is a tag ????
+        #print()
+        current_elem = current_elem.next_sibling
+
+        if current_elem == None:
+            #print("current_elem == None")
             break
-        print(type(elem))
-        if hasattr(elem, 'attrs'):
+
+        #print(type(current_elem))
+
+        """
+        if hasattr(current_elem, 'attrs'):
             print('attrs:', end='')
-            print(elem.attrs)
+            print(current_elem.attrs)
             print('content:', end='')
-            print(elem)
+            print(current_elem)
         else:
-            print("skipping")
-            elem = elem.next_sibling
+            print("skipping:", end='')
+            print(current_elem)
             continue
-        if "mw-heading2" in elem["class"]:
-            print("CAPTAIN WE'RE OVERFLOWING")
-        if elem.name == 'ol':
-            lis = elem.children
+        """
+        if not hasattr(current_elem, 'attrs'):
+            continue
+
+        if "class" in current_elem.attrs and "mw-heading2" in current_elem["class"]:
+            #print("CAPTAIN WE'RE OVERFLOWING")
+            break
+
+        if current_elem.name == 'ol':
+            #print("current_elem.name == ol")
+            lis = current_elem.children
             for li in lis:
                 line = ''
                 if li.name == None:
@@ -90,6 +109,6 @@ def wiki_decl(soup):
                     line  = line + kiddo.get_text()
                 line = line.strip()
                 print('\t' + line)
-        elem = elem.next_sibling
+        #current_elem = current_elem.next_sibling
 
 wiki_decl(soup_outer)
