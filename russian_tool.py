@@ -35,19 +35,6 @@ except ImportError:
 soup_outer = BeautifulSoup(html_doc, 'html.parser')
 
 
-"""
-sentences = soup.find("div", "section sentences").find_all("li")
-for sentence in sentences:
-    parts = sentence.find_all("span", recursive=False)
-    russ_pre = parts[0].get_text()
-    russ = russ_pre
-    eng = parts[1].get_text()
-    if russ[len(russ) - 1] == '.':
-        print("period")
-        russ = russ_pre[:len(russ_pre) - 2]
-    print(russ + " = " + eng)
-"""
-
 def open_decl(soup):
     declension_cells = soup.find("div", "section declension noun").find_all("td")
     for cell in declension_cells:
@@ -55,60 +42,90 @@ def open_decl(soup):
         for decl in decls:
             print(decl.get_text())
 
+# The elements corresponding to the header for a new language contain the
+# attribute 'class' set to "mw-heading2". This returns whether the current
+# has that, i.e., whether we've overflowed to the next language.
+def on_the_next_language(elem):
+    if "class" in elem.attrs and "mw-heading2" in elem["class"]:
+        return True
+    return False
 
+# New subsections for the same language (e.g., declensions or conjugations)
+# after the definition have 'class' attribute value 'mw-heading4'
+def on_new_subsection(elem):
+    if "class" in elem.attrs and "mw-heading4" in elem["class"]:
+        return True
+    return False
+
+# Returns whether the passed elem is contains the definitions for this word
+def on_definitions(elem):
+    # A tag is an ordered list iff it's the definitions section
+    # (so far as I can tell)
+    if elem.name == 'ol':
+        return True
+    return False
+
+def extract_defns(elem):
+
+    lines = []
+    lis = elem.children
+
+    for li in lis:
+
+        if li.name == None:
+            continue
+
+        line = ''
+        for kiddo in li.children:
+            if(kiddo.name != 'a' and kiddo.name != None 
+                            and kiddo.name != 'span'):
+                break
+            line  = line + kiddo.get_text()
+
+        line = line.strip()
+        lines.append(line)
+        print('\t' + line)
+
+    return lines
+
+# Returns the definitions, declensions, conjugations, and related terms
+# (as applicable) in the Russian section of the given soup element.
 def wiki_decl(soup):
+    defns = []
+    decl = []
+    conj = []
+    related = []
 
+    # Finds the section header for Russian
     russian_sec_search = soup.find_all(id="Russian")
 
     if len(russian_sec_search) < 1:
         print("Russian section not found")
         return
 
+    # Goes up one level to get out of the Russian header element
     current_elem = russian_sec_search[0].parent
 
     while True:
-        #print()
         current_elem = current_elem.next_sibling
 
         if current_elem == None:
-            #print("current_elem == None")
             break
 
-        #print(type(current_elem))
-
-        """
-        if hasattr(current_elem, 'attrs'):
-            print('attrs:', end='')
-            print(current_elem.attrs)
-            print('content:', end='')
-            print(current_elem)
-        else:
-            print("skipping:", end='')
-            print(current_elem)
-            continue
-        """
+        # There are often empty 'NaviagableString's between elements.
+        # This saves us from trying to query them
         if not hasattr(current_elem, 'attrs'):
             continue
 
-        if "class" in current_elem.attrs and "mw-heading2" in current_elem["class"]:
-            #print("CAPTAIN WE'RE OVERFLOWING")
+        # If we're now past the Russian section, terminate the search
+        if on_the_next_language(current_elem):
             break
 
-        if current_elem.name == 'ol':
-            #print("current_elem.name == ol")
-            lis = current_elem.children
-            for li in lis:
-                line = ''
-                if li.name == None:
-                    continue
-                j = 0
-                for kiddo in li.children:
-                    j += 1
-                    if kiddo.name != 'a' and kiddo.name != None and kiddo.name != 'span':
-                        break
-                    line  = line + kiddo.get_text()
-                line = line.strip()
-                print('\t' + line)
-        #current_elem = current_elem.next_sibling
+        if on_definitions(current_elem):
+            defns = extract_defns(current_elem)
+
+        if on_new_subsection(current_elem):
+            # Handle this
+            print()
 
 wiki_decl(soup_outer)
