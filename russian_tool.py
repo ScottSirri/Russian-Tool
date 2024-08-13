@@ -1,8 +1,6 @@
 import requests
 import sys
 import re
-from russtress import Accent
-accent = Accent()
 
 freq_file = open("frequency.txt", "r")
 
