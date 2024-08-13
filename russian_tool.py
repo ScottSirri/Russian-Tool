@@ -197,17 +197,16 @@ def extract_decl(elem):
 
     elem = next_elem(elem)
 
-    print(elem)
-
     # Declensions are a NavFrame inside a div element
     for elem_child in elem.children:
-        print(elem_child)
         if is_table(elem_child):
             return get_all_ru_table_contents(elem_child)
 
 # Returns the russian contents of all body cells in the table following the
 # passed mw-heading4 element
 def extract_conj(elem):
+
+    # TODO : Reorder conjugations, same tense consecutive
 
     # There is a style tag preceding conjugation tables
     elem = next_elem(elem)
@@ -223,7 +222,6 @@ def is_ul(elem):
     return False
 
 def extract_ul(elem):
-    print("called extract_ul")
     contents = []
     lis = elem.find_all("li")
     for li in lis:
@@ -278,30 +276,40 @@ def wiki_decl(soup):
                 conjs.extend(new_conjs)
         else:
             uls = current_elem.find_all("ul")
+            if is_ul(current_elem):
+                uls.append(current_elem)
+
             for ul in uls:
                 new_misc = extract_ul(current_elem)
                 misc.extend(new_misc)
+                misc.append(NEW_SEC)
                     
-
     print("\nDefinitions:")
     for line in defns:
         print("\t" + line)
+    print()
 
     if len(decls) > 0:
         print("\nDeclensions:")
         for line in decls:
             print("\t" + line)
+        print()
 
     if len(conjs) > 0:
-        print("\nConjugaions:")
+        print("\nConjugations:")
         for line in conjs:
             print("\t" + line)
+        print()
 
+    # TODO : Order words by frequency (first Russian word? split by spaces?)
     if len(misc) > 0:
         print("\nMisc:")
         for line in misc:
-            print("\t" + line)
-
+            if line == NEW_SEC:
+                print()
+            else:
+                print("\t" + line)
+        print()
 
 wiki_decl(soup_outer)
 
