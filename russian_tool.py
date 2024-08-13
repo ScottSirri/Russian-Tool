@@ -7,13 +7,12 @@ freq_file = open("frequency.txt", "r")
 # Oooooo magic numbers :o
 DECL = 1001
 CONJ = 1002
-SIMILAR = 1003
-OTHER = 1004
+OTHR = 1003
+NEW_SEC = 1004
 
 section_codes = { DECL : "DECL", 
-                 CONJ : "CONJ",
-                 SIMILAR : "SIMILAR",
-                 OTHER : "OTHER"}
+                  CONJ : "CONJ",
+                  OTHR : "OTHR"}
 
 url = ''
 
@@ -22,11 +21,6 @@ if len(sys.argv) > 1:
     url = 'https://en.wiktionary.org/wiki/' + query_word
 
 url_google = 'https://www.google.com/'
-url_open_sister = 'https://en.openrussian.org/ru/сестра'
-url_open_strike = 'https://en.openrussian.org/ru/забастовка'
-url_wiki_sister = 'https://en.wiktionary.org/wiki/сестра'
-url_wiki_strike = 'https://en.wiktionary.org/wiki/забастовка'
-url_wiki_improve = 'https://en.wiktionary.org/wiki/наладить'
 
 if url == '':
     url = url_wiki_improve
@@ -49,13 +43,6 @@ except ImportError:
 soup_outer = BeautifulSoup(html_doc, 'html.parser')
 
 
-def open_decl(soup):
-    declension_cells = soup.find("div", "section declension noun").find_all("td")
-    for cell in declension_cells:
-        decls = cell.find_all("p")
-        for decl in decls:
-            print(decl.get_text())
-
 # The elements corresponding to the header for a new language contain the
 # attribute 'class' set to "mw-heading2". This returns whether the current
 # has that, i.e., whether we've overflowed to the next language.
@@ -65,9 +52,11 @@ def on_the_next_language(elem):
     return False
 
 # New subsections for the same language (e.g., declensions or conjugations)
-# after the definition have 'class' attribute value 'mw-heading4'
-def on_new_subsection(elem):
-    if "class" in elem.attrs and "mw-heading4" in elem["class"]:
+# after the definition have 'class' attribute value 'mw-heading4'. I specially
+# handle these, and throw the rest into a grab bag
+def on_special_subsection(elem):
+    # TODO : May be worth implementing handling of mw-heading3 elements as well
+    if "class" in elem.attrs and "mw-heading4" in elem["class"]: 
         return True
     return False
 
@@ -79,8 +68,10 @@ def on_definitions(elem):
         return True
     return False
 
+# Passed an ol element, returns its contents as individual lines (excluding
+# any example sentences included with them)
 def extract_defns(elem):
-
+    # TODO : Returns the included example sentences separately (?)
     lines = []
 
     for li in elem.children:
@@ -98,6 +89,7 @@ def extract_defns(elem):
 
     return lines
 
+# Returns the section type of the passed element
 def get_subsection_type(elem):
 
     h4_elems = elem.find_all("h4")
@@ -116,11 +108,14 @@ def get_subsection_type(elem):
                 return DECL
             elif "Conjugation" in elem_id:
                 return CONJ
-            elif "Related" in elem_id or "Derived" in elem_id:
-                return SIMILAR
             else:
-                return OTHER
+                # There are so many types of sections, not worth handling them all. 
+                # Lots of interesting miscellaneous sections are followed by a ul 
+                # element, so I just pass up any special handling of "other" 
+                # sections and stuff all their ul's in the same bag
+                return OTHR
 
+# Returns whether the passed element is the topmost element of a table (NavFrame)
 def is_table(elem):
     if is_valid_elem(elem):
         if elem_is_contains(elem, 'class', 'NavFrame'):
@@ -197,6 +192,7 @@ def next_elem(elem):
         elem = elem.next_sibling
     return elem
 
+# Returns all contents of the table following the passed mw-heading4 element 
 def extract_decl(elem):
 
     elem = next_elem(elem)
@@ -209,6 +205,8 @@ def extract_decl(elem):
         if is_table(elem_child):
             return get_all_ru_table_contents(elem_child)
 
+# Returns the russian contents of all body cells in the table following the
+# passed mw-heading4 element
 def extract_conj(elem):
 
     # There is a style tag preceding conjugation tables
@@ -219,9 +217,18 @@ def extract_conj(elem):
     if is_table(elem):
         return get_body_ru_table_contents(elem)
 
-def extract_similar(elem):
-    # TODO : Implement
-    print("called extract_similar")
+def is_ul(elem):
+    if is_valid_elem(elem) and elem.name == "ul":
+        return True
+    return False
+
+def extract_ul(elem):
+    print("called extract_ul")
+    contents = []
+    lis = elem.find_all("li")
+    for li in lis:
+        contents.append(li.get_text())
+    return contents
 
 # Returns the definitions, declensions, conjugations, and related terms
 # (as applicable) in the Russian section of the given soup element.
@@ -229,7 +236,7 @@ def wiki_decl(soup):
     defns = []
     decls = []
     conjs = []
-    related = []
+    misc = []
 
     # Finds the section header for Russian
     russian_sec_search = soup.find_all(id="Russian")
@@ -258,11 +265,10 @@ def wiki_decl(soup):
             break
 
         if on_definitions(current_elem):
-            defns.extend(extract_defns(current_elem))
-
-        if on_new_subsection(current_elem):
+            new_defns = extract_defns(current_elem)
+            defns.extend(new_defns)
+        elif on_special_subsection(current_elem):
             type_subsection = get_subsection_type(current_elem)
-            # TODO : Implement other subsection types
             print("SECTION FOUND: " + section_codes[type_subsection])
             if type_subsection == DECL:
                 new_decls = extract_decl(current_elem)
@@ -270,6 +276,12 @@ def wiki_decl(soup):
             elif type_subsection == CONJ:
                 new_conjs = extract_conj(current_elem)
                 conjs.extend(new_conjs)
+        else:
+            uls = current_elem.find_all("ul")
+            for ul in uls:
+                new_misc = extract_ul(current_elem)
+                misc.extend(new_misc)
+                    
 
     print("\nDefinitions:")
     for line in defns:
@@ -284,7 +296,12 @@ def wiki_decl(soup):
         print("\nConjugaions:")
         for line in conjs:
             print("\t" + line)
-    print("conjs len:" + str(len(conjs)))
+
+    if len(misc) > 0:
+        print("\nMisc:")
+        for line in misc:
+            print("\t" + line)
+
 
 wiki_decl(soup_outer)
 
