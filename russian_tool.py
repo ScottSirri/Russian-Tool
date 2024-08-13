@@ -128,7 +128,7 @@ def is_table(elem):
     return False
 
 # Some attributes are multi-valued, so it's hard to tell whether you're
-# querying for an exact membership or membership. This tests both.
+# querying for an exact value or membership. This tests both.
 def elem_is_contains(elem, key, query):
     if not is_valid_elem(elem):
         return False
@@ -140,12 +140,12 @@ def elem_is_contains(elem, key, query):
         return query == elem[key]
 
 # Returns a list of all Russian-language table contents
-def get_all_table_contents(table_elem):
+def get_all_ru_table_contents(table_elem):
     
     contents = []
 
     if not elem_is_contains(table_elem, 'class', 'NavFrame'):
-        print("Non-table element has been passed to get_all_table_contents")
+        print("Non-table element has been passed to get_all_ru_table_contents")
         return
 
     table_contents_elem = table_elem.find("div", "NavContent")
@@ -158,26 +158,66 @@ def get_all_table_contents(table_elem):
             contents.append(cell.get_text())
         return contents
 
+# Returns all non-header cell Russian language table contents
+def get_body_ru_table_contents(table_elem):
+    
+    contents = []
+
+    if not elem_is_contains(table_elem, 'class', 'NavFrame'):
+        print("Non-table element has been passed to get_body_ru_table_contents")
+        return
+
+    table_contents_elem = table_elem.find("div", "NavContent")
+
+    if table_contents_elem == None:
+        print("table contents not found")
+    else:
+        body_cells = table_contents_elem.find_all("td")
+        for cell in body_cells:
+            # TODO : In table cells with more than one line/russian word,
+            # this currently appends them. It should break on the comma.
+            cell_str = ""
+            ru_text = cell.find_all("span", lang="ru")
+            for ru in ru_text:
+                cell_str = cell_str + ru.get_text()
+            if len(cell_str) > 0:
+                contents.append(cell_str)
+        return contents
+
 # If the elem is None or is an empty NavigableString, return False
 def is_valid_elem(elem):
     if elem == None or not hasattr(elem, 'attrs'):
         return False
     return True
 
-def extract_decl(elem):
-
+# Returns the next sibling element (ignoring invalid elements)
+def next_elem(elem):
     elem = elem.next_sibling
-
     while not is_valid_elem(elem):
         elem = elem.next_sibling
+    return elem
 
+def extract_decl(elem):
+
+    elem = next_elem(elem)
+
+    print(elem)
+
+    # Declensions are a NavFrame inside a div element
     for elem_child in elem.children:
+        print(elem_child)
         if is_table(elem_child):
-            return get_all_table_contents(elem_child)
+            return get_all_ru_table_contents(elem_child)
 
 def extract_conj(elem):
-    # TODO : Implement
-    print("called extract_conj")
+
+    # There is a style tag preceding conjugation tables
+    elem = next_elem(elem)
+    elem = next_elem(elem)
+
+    # Conjugation table is a NavFrame rawdogging it out on its own in the open
+    if is_table(elem):
+        return get_body_ru_table_contents(elem)
 
 def extract_similar(elem):
     # TODO : Implement
@@ -222,20 +262,59 @@ def wiki_decl(soup):
 
         if on_new_subsection(current_elem):
             type_subsection = get_subsection_type(current_elem)
-            # TODO : Implement
+            # TODO : Implement other subsection types
             print("SECTION FOUND: " + section_codes[type_subsection])
             if type_subsection == DECL:
-                decls.extend(extract_decl(current_elem))
+                new_decls = extract_decl(current_elem)
+                decls.extend(new_decls)
+            elif type_subsection == CONJ:
+                new_conjs = extract_conj(current_elem)
+                conjs.extend(new_conjs)
 
     print("\nDefinitions:")
     for line in defns:
         print("\t" + line)
 
-    print("\nDeclensions:")
-    for line in decls:
-        print("\t" + line)
+    if len(decls) > 0:
+        print("\nDeclensions:")
+        for line in decls:
+            print("\t" + line)
+
+    if len(conjs) > 0:
+        print("\nConjugaions:")
+        for line in conjs:
+            print("\t" + line)
+    print("conjs len:" + str(len(conjs)))
 
 wiki_decl(soup_outer)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Given a string and an index in it, return the whole line containing
 # that character corresponding to that index
