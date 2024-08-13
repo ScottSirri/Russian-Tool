@@ -109,13 +109,14 @@ def get_subsection_type(elem):
             elif "Conjugation" in elem_id:
                 return CONJ
             else:
-                # There are so many types of sections, not worth handling them all. 
-                # Lots of interesting miscellaneous sections are followed by a ul 
-                # element, so I just pass up any special handling of "other" 
-                # sections and stuff all their ul's in the same bag
+                # There are so many types of sections, not worth handling them 
+                # all. Lots of interesting miscellaneous sections are followed 
+                # by a ul element, so I just pass up any special handling of
+                # "other" sections and stuff all their ul's in the same bag
                 return OTHR
 
-# Returns whether the passed element is the topmost element of a table (NavFrame)
+# Returns whether the passed element is the topmost element of 
+# a table (NavFrame element)
 def is_table(elem):
     if is_valid_elem(elem):
         if elem_is_contains(elem, 'class', 'NavFrame'):
@@ -159,7 +160,7 @@ def get_body_ru_table_contents(table_elem):
     contents = []
 
     if not elem_is_contains(table_elem, 'class', 'NavFrame'):
-        print("Non-table element has been passed to get_body_ru_table_contents")
+        print("Non-table element passed to get_body_ru_table_contents")
         return
 
     table_contents_elem = table_elem.find("div", "NavContent")

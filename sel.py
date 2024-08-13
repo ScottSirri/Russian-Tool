@@ -4,6 +4,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+# Simple proof of concept that a string of Russian text may be submitted to
+# russiangram.com to add appropriate stress marks to the text
+
 driver = webdriver.Chrome()
 driver.get("https://russiangram.com/")
 print(driver.title)
