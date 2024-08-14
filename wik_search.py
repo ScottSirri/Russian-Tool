@@ -46,7 +46,8 @@ def on_definitions(elem):
 # Passed an ol element, returns its contents as individual lines (excluding
 # any example sentences included with them)
 def extract_defns(elem):
-    # TODO : Return the included example sentences separately (?)
+    # TODO : Return the included example sentencesn, synonyms, etc included 
+    # as a dl following an li
     lines = []
 
     for li in elem.children:
@@ -172,8 +173,12 @@ def next_elem(elem):
 def extract_decl(elem):
 
     elem = next_elem(elem)
+    
+    # Sometimes the table is at a table at the topmost level
+    if is_table(elem):
+        return get_all_ru_table_contents(elem)
 
-    # Declensions are a NavFrame inside a div element
+    # But usually, declensions are a NavFrame inside a div element
     for elem_child in elem.children:
         if is_table(elem_child):
             return get_all_ru_table_contents(elem_child)
@@ -209,6 +214,9 @@ def extract_ul(elem):
 def search(word):
     defns = search_defn(word)
     ret = search_misc(word)
+    if defns == None or ret == None:
+        print("search: search_defn and/or search_misc returned 'None'")
+        return None
     ret['defns'] = defns
     return ret
 
@@ -313,12 +321,19 @@ def search_misc(word):
 
         if on_special_subsection(current_elem):
             type_subsection = get_subsection_type(current_elem)
-            print("search_misc: SECTION FOUND: " + section_codes[type_subsection])
+            print("search_misc: SECTION FOUND: " 
+                  + section_codes[type_subsection])
             if type_subsection == DECL:
                 new_decls = extract_decl(current_elem)
+                if new_decls == None:
+                    print("search_misc: extract_decl returned None")
+                    return None
                 decls.extend(new_decls)
             elif type_subsection == CONJ:
                 new_conjs = extract_conj(current_elem)
+                if new_conjs == None:
+                    print("search_misc: extract_conj returned None")
+                    return None
                 conjs.extend(new_conjs)
         else:
             uls = current_elem.find_all("ul")
@@ -327,6 +342,10 @@ def search_misc(word):
 
             for ul in uls:
                 new_misc = extract_ul(current_elem)
+                # Manually omitting a common and uninteresting ul element
+                if(len(new_misc) == 2 and "IPA" in new_misc[0] 
+                        and "Audio:" in new_misc[1]):
+                    continue
                 misc.extend(new_misc)
                 misc.append(NEW_SEC)
     return {'conjs' : conjs, 'decls' : decls, 'misc' : misc}

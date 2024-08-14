@@ -1,8 +1,5 @@
-import requests
 import sys
-import re
-import wik_search, yan_search
-
+import wik_search, yan_search, freq_processing
 
 freq_file = open("frequency.txt", "r")
 
@@ -21,27 +18,15 @@ query_word = 'яблоко'
 if len(sys.argv) > 1:
     query_word = sys.argv[1]
 
-yan_search.search_exs(query_word)
-
-# Given a string and an index in it, return the whole line containing
-# that character corresponding to that index
-def get_line(string, ind):
-    start_ind = ind
-    end_ind = ind
-    while string[start_ind] != '\n':
-        start_ind -= 1
-    start_ind += 1
-    if string[start_ind] == '\t':
-        start_ind += 1
-    while string[end_ind] != '\n':
-        end_ind += 1
-    return string[start_ind:end_ind]
-
 info = wik_search.search(query_word)
+if info == None:
+    print("wik_search returned None")
+    sys.exit()
+
 defns = info['defns']
 decls = info['decls']
 conjs = info['conjs']
-misc = info['misc']
+misc  = info['misc']
 
 print("\nDefinitions:")
 for line in defns:
@@ -70,36 +55,10 @@ if len(misc) > 0:
             print("\t" + line)
     print()
 
-file_str = freq_file.read()
+freq = freq_processing.get_freq(freq_file, query_word)[1]
+print(f"Frequency of word: %d" % freq)
 
-freq_matches = {}
-
-for match in re.finditer(query_word, file_str):
-    line = get_line(file_str, match.start())
-
-    num_split = line.split('.')
-    number = num_split[0]
-
-    word_split = line.split('\t')
-    word = word_split[1].split(' ')[0]
-
-    freq_matches[word] = number
-
-print()
-elem_found = False
-if query_word in freq_matches:
-    elem_found = True
-    print("Frequency list match found:")
-    print('\t' + query_word + " (freq " + str(freq_matches[query_word]) + ")")
-else:
-    print("Query word not found on frequency list")
-
-print()
-
-print("Other honorable mentions from the frequency list:")
-for key in freq_matches:
-    if key != query_word:
-        print('\t' + key + " (freq " + str(freq_matches[key]) + ")")
-
+print("\nExample sentences:")
+yan_search.search_exs(query_word)
 
 freq_file.close()
