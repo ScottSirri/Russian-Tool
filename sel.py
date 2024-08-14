@@ -20,6 +20,6 @@ submit_button.click()
 
 text_box = driver.find_element(By.NAME, "ctl00$MainContent$UserSentenceTextbox")
 wait = WebDriverWait(driver, 10)
-element = wait.until(EC.visibility_of(text_box))
+wait.until(EC.visibility_of(text_box))
 
 print(text_box.text)
