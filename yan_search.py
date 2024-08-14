@@ -6,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import StaleElementReferenceException
 
 
 try: 
@@ -46,14 +47,17 @@ def search_exs(query):
         print("waiting (loop)")
         driver.implicitly_wait(2)
         print("clicking")
-        more_button.click()
 
-
-
-    #html_doc = r.text
-
-    #print("search_exs: HTML DOC LEN: "  + str(len(html_doc)))
-
-    #soup = BeautifulSoup(html_doc, 'html.parser')
+        try:
+            more_button.click()
+        except StaleElementReferenceException:
+            print("StaleElementReferenceException")
+            break
+    
+    html_doc = driver.page_source
+    print("search_exs: HTML DOC LEN: "  + str(len(html_doc)))
+    soup = BeautifulSoup(html_doc, 'html.parser')
+    ex_app = soup.find(id="examplesApp")
+    print(ex_app.get_text())
 
     
