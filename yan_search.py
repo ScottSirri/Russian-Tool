@@ -15,7 +15,6 @@ except ImportError:
 
 url_base_yandex = "https://translate.yandex.com/examples/Russian-English/"
 more_button_class = "dxri7VWzxK_2mtfgodWr"
-wrong_class = "a"
 
 # Returns from Wiktionary the definitions and misc information for a word or
 # for each of a tuple of words
@@ -64,7 +63,7 @@ def search_exs(query):
             button_available = False
     
     html_doc = driver.page_source
-    print("search_exs: HTML DOC LEN: "  + str(len(html_doc)))
+    #print("search_exs: HTML DOC LEN: "  + str(len(html_doc)))
     soup = BeautifulSoup(html_doc, 'html.parser')
     ex_elems = soup.find_all("div", {"class" : "HPdYZk2E3bjTdcGIYdld"})
     if len(ex_elems) == 0:
@@ -77,6 +76,6 @@ def search_exs(query):
         for kiddo in elem.children:
             ex.append(kiddo.get_text())
         exs.append(ex)
-    for ex in exs:
-        print(ex[0] + " = " + ex[1])
+    #for ex in exs:
+    #    print(ex[0] + " = " + ex[1])
     return exs

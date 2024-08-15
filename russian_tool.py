@@ -69,10 +69,13 @@ def s(elem):
     return elem[0]
 sorted_synos.sort(key=s)
 
-for syno in sorted_synos:
-    if syno[0] > 0:
+for i in range(len(sorted_synos)):
+    syno = sorted_synos[i]
+    if syno[0] > 0 and (i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno[1]) and syno[1] != query_word:
         print("\t" + str(syno[0]) + ": " + syno[1])
 print()
 
 print("\nExample sentences:")
-yan_search.search_exs(query_word)
+exs = yan_search.search_exs(query_word)
+for i in range(10):
+    print("\t" + exs[i][0] + " = " + exs[i][1])
