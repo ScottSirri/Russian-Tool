@@ -14,8 +14,6 @@ section_codes = { DECL : "DECL",
                   CONJ : "CONJ",
                   OTHR : "OTHR"}
 
-print("translation:" + pymarc.marc8.marc8_to_unicode("%F1%E5%F0%E4%E8%F2%FB%E9"))
-
 query_word = 'яблоко'
 
 if len(sys.argv) > 1:
@@ -60,6 +58,12 @@ if len(misc) > 0:
 
 freq = freq_processing.get_freq(freq_file, query_word)[1]
 print(f"Frequency of word: %d" % freq)
+
+synos = syno_search.get_synonyms(query_word)
+print(f"Synonyms of %s:" % query_word)
+for syno in synos:
+    print("\t" + syno)
+print()
 
 print("\nExample sentences:")
 yan_search.search_exs(query_word)

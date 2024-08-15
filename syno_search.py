@@ -54,9 +54,3 @@ def get_synonyms(word):
         syno = syno_a.get_text()
         synos.append(syno)
     return synos
-
-word = "сталкиваться"
-synos = get_synonyms(word)
-print("Synonyms for " + word)
-for syno in synos:
-    print("\t" + syno)
