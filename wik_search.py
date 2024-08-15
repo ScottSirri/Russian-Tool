@@ -233,7 +233,7 @@ def search_defn(word):
         sys.exit()
     html_doc = r.text
 
-    print("search_defn: HTML DOC LEN: "  + str(len(html_doc)))
+    #print("search_defn: HTML DOC LEN: "  + str(len(html_doc)))
 
     soup = BeautifulSoup(html_doc, 'html.parser')
 
@@ -274,6 +274,7 @@ def search_defn(word):
 
 # Returns from Wiktionary the conjugation, declension, and misc information 
 # as applicable
+# TODO : Omit the ru-glish pronunciations in parentheses after words
 def search_misc(word):
 
     url_wiktionary = url_base_wiktionary + word
@@ -285,7 +286,7 @@ def search_misc(word):
         sys.exit()
     html_doc = r.text
 
-    print("search_misc: HTML DOC LEN: "  + str(len(html_doc)))
+    #print("search_misc: HTML DOC LEN: "  + str(len(html_doc)))
 
     soup = BeautifulSoup(html_doc, 'html.parser')
 
@@ -321,8 +322,8 @@ def search_misc(word):
 
         if on_special_subsection(current_elem):
             type_subsection = get_subsection_type(current_elem)
-            print("search_misc: SECTION FOUND: " 
-                  + section_codes[type_subsection])
+            #print("search_misc: SECTION FOUND: " 
+            #      + section_codes[type_subsection])
             if type_subsection == DECL:
                 new_decls = extract_decl(current_elem)
                 if new_decls == None:
@@ -343,8 +344,8 @@ def search_misc(word):
             for ul in uls:
                 new_misc = extract_ul(current_elem)
                 # Manually omitting a common and uninteresting ul element
-                if(len(new_misc) == 2 and "IPA" in new_misc[0] 
-                        and "Audio:" in new_misc[1]):
+                if len(new_misc) >= 1 and ("IPA" in new_misc[0] 
+                                           or "Audio:" in new_misc[0]):
                     continue
                 misc.extend(new_misc)
                 misc.append(NEW_SEC)

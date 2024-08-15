@@ -14,26 +14,17 @@ def get_line(string, ind):
         end_ind += 1
     return string[start_ind:end_ind]
 
-# Given a word (or list of words), returns a tuple (of tuples) containing
+# Given a word, returns a tuple (of tuples) containing
 # the word followed by its integer frequency in the frequency list denoting
 # the frequency/popularity of this word in the Russian language
-def get_freq(freq_file, query):
+def get_freq(query):
 
+    freq_file = open("frequency.txt", "r")
     file_str = freq_file.read()
 
-    ret = []
-
-    if type(query) == list:
-        for word in query:
-            assert type(word) == str
-            word_freq = get_freq(freq_file)
-            ret.append(word_freq)
-    elif type(query) == str:
-        query.strip()
-        ret.append(query)
-    else:
+    if type(query) != str:
         print("get_freq: Invalid query type")
-        return []
+        return None
 
     # The frequency list doesn't spell words using 'ё', have to replace that
     if 'ё' in query:
@@ -52,12 +43,12 @@ def get_freq(freq_file, query):
 
         if word == query:
             try:
-                ret.append(int(number))
+                return int(number)
             except ValueError:
                 print("get_freq: Number in frequency file isn't a number >:(")
-                return []
-            return ret
+                return None
+            return None
 
-    print(f"get_freq: Query \"%s\" not found in frequency list" % query)
-    ret.append(-1)
-    return ret
+    #print(f"get_freq: Query \"%s\" not found in frequency list" % query)
+    freq_file.close()
+    return -1

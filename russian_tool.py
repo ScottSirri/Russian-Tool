@@ -2,7 +2,6 @@ import sys
 import wik_search, yan_search, freq_processing, syno_search
 import pymarc.marc8
 
-freq_file = open("frequency.txt", "r")
 
 # Oooooo magic numbers :o
 DECL = 1001
@@ -56,16 +55,24 @@ if len(misc) > 0:
             print("\t" + line)
     print()
 
-freq = freq_processing.get_freq(freq_file, query_word)[1]
+freq = freq_processing.get_freq(query_word)
 print(f"Frequency of word: %d" % freq)
 
 synos = syno_search.get_synonyms(query_word)
+sorted_synos = []
 print(f"Synonyms of %s:" % query_word)
 for syno in synos:
-    print("\t" + syno)
+    freq = freq_processing.get_freq(syno)
+    sorted_synos.append([freq, syno])
+
+def s(elem):
+    return elem[0]
+sorted_synos.sort(key=s)
+
+for syno in sorted_synos:
+    if syno[0] > 0:
+        print("\t" + str(syno[0]) + ": " + syno[1])
 print()
 
 print("\nExample sentences:")
 yan_search.search_exs(query_word)
-
-freq_file.close()
