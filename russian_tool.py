@@ -1,5 +1,6 @@
 import sys
-import wik_search, yan_search, freq_processing
+import wik_search, yan_search, freq_processing, syno_search
+import pymarc.marc8
 
 freq_file = open("frequency.txt", "r")
 
@@ -12,6 +13,8 @@ NEW_SEC = 1004
 section_codes = { DECL : "DECL", 
                   CONJ : "CONJ",
                   OTHR : "OTHR"}
+
+print("translation:" + pymarc.marc8.marc8_to_unicode("%F1%E5%F0%E4%E8%F2%FB%E9"))
 
 query_word = 'яблоко'
 
