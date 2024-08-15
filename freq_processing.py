@@ -19,12 +19,20 @@ def get_line(string, ind):
 # the frequency/popularity of this word in the Russian language
 def get_freq(query):
 
-    freq_file = open("frequency.txt", "r")
-    file_str = freq_file.read()
-
     if type(query) != str:
         print("get_freq: Invalid query type")
         return None
+
+    query = query.strip()
+    """query = re.sub('\(', '', query)
+    query = re.sub('\)', '', query)
+    query = re.sub(',', '', query)
+    query = re.sub('.', '', query)"""
+    if " " in query or len(query) == 0:
+        return -1
+
+    freq_file = open("frequency.txt", "r")
+    file_str = freq_file.read()
 
     # The frequency list doesn't spell words using 'ё', have to replace that
     if 'ё' in query:
@@ -39,6 +47,7 @@ def get_freq(query):
         number = num_split[0]
 
         word_split = line.split('\t')
+        #print(query + "+" + line + "+" + str(word_split))
         word = word_split[1].split(' ')[0]
 
         if word == query:

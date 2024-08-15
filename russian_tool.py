@@ -60,22 +60,31 @@ print(f"Frequency of word: %d" % freq)
 
 synos = syno_search.get_synonyms(query_word)
 sorted_synos = []
-print(f"Synonyms of %s:" % query_word)
 for syno in synos:
     freq = freq_processing.get_freq(syno)
-    sorted_synos.append([freq, syno])
+    if freq > -1:
+        sorted_synos.append([freq, syno])
 
 def s(elem):
     return elem[0]
 sorted_synos.sort(key=s)
 
+print(f"Synonyms of %s:" % query_word)
 for i in range(len(sorted_synos)):
     syno = sorted_synos[i]
-    if syno[0] > 0 and (i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno[1]) and syno[1] != query_word:
-        print("\t" + str(syno[0]) + ": " + syno[1])
+    if (i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno[1]) and syno[1] != query_word:
+        syno_defns = wik_search.search_defn(syno[1])
+        defn_str = ""
+        for defn in syno_defns:
+            defn_str = defn_str + defn + "; "
+        defn_str = defn_str[:len(defn_str)-2]
+        print("\t" + str(syno[0]) + ": " + syno[1] + " = " + defn_str)
 print()
 
 print("\nExample sentences:")
 exs = yan_search.search_exs(query_word)
 for i in range(10):
-    print("\t" + exs[i][0] + " = " + exs[i][1])
+    ex = exs[i]
+    if ex[0][len(ex[0]) - 1] == ".":
+        ex[0] = ex[0][:len(ex[0]) - 1]
+    print("\t" + ex[0] + " = " + ex[1])
