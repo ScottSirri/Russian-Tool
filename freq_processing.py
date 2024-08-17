@@ -24,11 +24,12 @@ def get_freq(query):
         return None
 
     query = query.strip()
-    """query = re.sub('\(', '', query)
+    query = re.sub('\(', '', query)
     query = re.sub('\)', '', query)
-    query = re.sub(',', '', query)
-    query = re.sub('.', '', query)"""
+    query = re.sub('\,', '', query)
+    query = re.sub('\.', '', query)
     if " " in query or len(query) == 0:
+        print(f"Invalid query:\'%s\'" % query)
         return -1
 
     freq_file = open("frequency.txt", "r")
@@ -40,6 +41,7 @@ def get_freq(query):
             
     freq_matches = {}
 
+    print(f"Matching query:\'%s\'" % query)
     for match in re.finditer(query, file_str):
         line = get_line(file_str, match.start())
 

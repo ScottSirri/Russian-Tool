@@ -38,6 +38,7 @@ def encode(string):
 def get_synonyms(word):
     encoded_word = encode(word)
     url = url_base_syn + encoded_word
+    print(f"url:\'%s\'" % url)
     r = None
     try:
         r = requests.get(url)
@@ -45,6 +46,7 @@ def get_synonyms(word):
         print(f"search_defn: Link not valid (%s)" % url)
         sys.exit()
     html_doc = r.text
+    print(f"html_doc:\'%s\'" % html_doc[:50])
     soup = BeautifulSoup(html_doc, 'html.parser')
     syno_frame = soup.find("div", "panel panel-default panel-body lead")
     syno_frame = syno_frame.parent
