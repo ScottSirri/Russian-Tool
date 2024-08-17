@@ -1,4 +1,5 @@
 import sys, requests
+from math import ceil
 
 try: 
     from BeautifulSoup import BeautifulSoup
@@ -28,9 +29,14 @@ def get_synonyms(word, recursive_level=0, cutoff=99999):
 
         synos.append(syno.lower())
         cutoff -= 1
+        if cutoff <= 0:
+            break
 
-        if recursive_level > 0 and cutoff > 0:
-            adjacent_synos = get_synonyms(syno, recursive_level - 1, cutoff)
+    if recursive_level > 0 and cutoff > 0:
+        adj_per_syno = ceil(cutoff/len(synos))
+        #print("ADJ PER SYNO: " + str(adj_per_syno))
+        for syno in synos:
+            #print("Finding adj in " + syno)
+            adjacent_synos = get_synonyms(syno, recursive_level - 1, adj_per_syno)
             synos.extend(adjacent_synos)
-            cutoff -= len(adjacent_synos)
     return synos

@@ -9,8 +9,8 @@ CONJ = 1002
 OTHR = 1003
 NEW_SEC = 1004
 
-synonym_num_recursive_levels = 1
-synonyms_cutoff = 60
+synonym_num_recursive_levels = 0
+synonyms_cutoff = 9999
 
 section_codes = { DECL : "DECL", 
                   CONJ : "CONJ",
