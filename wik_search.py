@@ -243,7 +243,7 @@ def search_defn(word):
     russian_sec_search = soup.find_all(id="Russian")
 
     if len(russian_sec_search) < 1:
-        print("search_defn: Russian section not found")
+        #print("search_defn: Russian section not found")
         return
 
     # Goes up one level to get out of the Russian header element

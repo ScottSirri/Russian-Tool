@@ -9,6 +9,9 @@ CONJ = 1002
 OTHR = 1003
 NEW_SEC = 1004
 
+synonym_num_recursive_levels = 1
+synonyms_cutoff = 60
+
 section_codes = { DECL : "DECL", 
                   CONJ : "CONJ",
                   OTHR : "OTHR"}
@@ -58,27 +61,40 @@ if len(misc) > 0:
 freq = freq_processing.get_freq(query_word)
 print(f"Frequency of word: %d" % freq)
 
-synos = syno_search.get_synonyms(query_word)
+synos = syno_search.get_synonyms(query_word, synonym_num_recursive_levels, synonyms_cutoff)
 sorted_synos = []
 for syno in synos:
     freq = freq_processing.get_freq(syno)
-    if freq > -1:
+    if freq > 0:
         sorted_synos.append([freq, syno])
 
 def s(elem):
     return elem[0]
 sorted_synos.sort(key=s)
 
-print(f"Synonyms of %s:" % query_word)
 for i in range(len(sorted_synos)):
-    syno = sorted_synos[i]
-    if (i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno[1]) and syno[1] != query_word:
-        syno_defns = wik_search.search_defn(syno[1])
-        defn_str = ""
-        for defn in syno_defns:
-            defn_str = defn_str + defn + "; "
-        defn_str = defn_str[:len(defn_str)-2]
-        print("\t" + str(syno[0]) + ": " + syno[1] + " = " + defn_str)
+    
+    syno_tup = sorted_synos[i]
+    freq = int(syno_tup[0])
+    syno = syno_tup[1]
+
+    if (i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno) and syno != query_word:
+        
+        syno_defns = wik_search.search_defn(syno)
+
+        if syno_defns != None:
+            defn_str = ""
+            for defn in syno_defns:
+                defn_str = defn_str + defn + "; "
+            defn_str = defn_str[:len(defn_str)-2]
+
+        freq_str = str(freq).rjust(5, " ")
+        if freq <= 20000 and syno_defns != None:
+            print("\t" + freq_str + ": " + syno + " = " + defn_str)
+        elif syno_defns != None:
+            print("\t" + syno + " = " + defn_str)
+        else:
+            print("\t" + syno)
 print()
 
 print("\nExample sentences:")

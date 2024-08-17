@@ -20,17 +20,17 @@ def get_line(string, ind):
 def get_freq(query):
 
     if type(query) != str:
-        print("get_freq: Invalid query type")
+        print(query)
+        print(f"get_freq: Invalid query type (%s)" % str(type(query)))
         return None
 
     query = query.strip()
     query = re.sub('\(', '', query)
     query = re.sub('\)', '', query)
-    query = re.sub('\,', '', query)
-    query = re.sub('\.', '', query)
-    if " " in query or len(query) == 0:
-        print(f"Invalid query:\'%s\'" % query)
+    if "_" in query or any(char.isdigit() for char in query):
         return -1
+    if " " in query:
+        return 20001
 
     freq_file = open("frequency.txt", "r")
     file_str = freq_file.read()
@@ -41,7 +41,6 @@ def get_freq(query):
             
     freq_matches = {}
 
-    print(f"Matching query:\'%s\'" % query)
     for match in re.finditer(query, file_str):
         line = get_line(file_str, match.start())
 
@@ -49,7 +48,6 @@ def get_freq(query):
         number = num_split[0]
 
         word_split = line.split('\t')
-        #print(query + "+" + line + "+" + str(word_split))
         word = word_split[1].split(' ')[0]
 
         if word == query:
