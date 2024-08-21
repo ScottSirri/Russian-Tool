@@ -9,18 +9,25 @@ CONJ = 1002
 OTHR = 1003
 NEW_SEC = 1004
 
-synonym_num_recursive_levels = 0
-synonyms_cutoff = 9999
-
 section_codes = { DECL : "DECL", 
                   CONJ : "CONJ",
                   OTHR : "OTHR"}
 
+# When searching for synonyms of a word, how many recursive levels does the 
+# search go (e.g., do you include synonyms of synonyms)
+synonym_num_recursive_levels = 0
+# Upper limit on the number of synonyms that may be read during synonym search
+synonyms_cutoff = 999
+# Number of synonyms that will be printed
+num_synos = 40
+
+# Arbitrary default query word
 query_word = 'яблоко'
 
 if len(sys.argv) > 1:
     query_word = sys.argv[1]
 
+# Scrape the Wiktionary page for the query word
 info = wik_search.search(query_word)
 if info == None:
     print("wik_search returned None")
@@ -48,7 +55,9 @@ if len(conjs) > 0:
         print("\t" + line)
     print()
 
-# TODO : Order words by frequency (first Russian word? split by spaces?)
+# TODO : Create a second copy of the string where every Russian word's 
+# frequency is printed after it in parentheses, and then the viewier can 
+# toggle between the views.
 if len(misc) > 0:
     print("\nMisc:")
     for line in misc:
@@ -61,24 +70,28 @@ if len(misc) > 0:
 freq = freq_processing.get_freq(query_word)
 print(f"Frequency of word: %d" % freq)
 
-synos = syno_search.get_synonyms(query_word, synonym_num_recursive_levels, synonyms_cutoff)
+synos = syno_search.get_synonyms(query_word, synonym_num_recursive_levels,
+                                 synonyms_cutoff)
 sorted_synos = []
+print("num synos: " + str(len(synos)))
 for syno in synos:
     freq = freq_processing.get_freq(syno)
     if freq > 0:
         sorted_synos.append([freq, syno])
+print("num sorted synos: " + str(len(sorted_synos)))
 
 def s(elem):
     return elem[0]
 sorted_synos.sort(key=s)
 
-for i in range(len(sorted_synos)):
+for i in range(min(num_synos, len(sorted_synos))):
     
     syno_tup = sorted_synos[i]
     freq = int(syno_tup[0])
     syno = syno_tup[1]
 
-    if (i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno) and syno != query_word:
+    if ((i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno)
+        and syno != query_word):
         
         syno_defns = wik_search.search_defn(syno)
 
@@ -94,6 +107,8 @@ for i in range(len(sorted_synos)):
         elif syno_defns != None:
             print("\t" + syno + " = " + defn_str)
         else:
+            # TODO : Insert machine translations of words/phrases not found in Wiktionary
+            # (with an asterisk denoting it's a machine translation)
             print("\t" + syno)
 print()
 

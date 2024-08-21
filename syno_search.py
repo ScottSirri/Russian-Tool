@@ -1,5 +1,5 @@
 import sys, requests
-from math import ceil
+from math import ceil, floor
 
 try: 
     from BeautifulSoup import BeautifulSoup
@@ -33,10 +33,9 @@ def get_synonyms(word, recursive_level=0, cutoff=99999):
             break
 
     if recursive_level > 0 and cutoff > 0:
-        adj_per_syno = ceil(cutoff/len(synos))
-        #print("ADJ PER SYNO: " + str(adj_per_syno))
+        # To get an even sampling across recursive branches
+        adj_per_syno = floor(cutoff/len(synos))
         for syno in synos:
-            #print("Finding adj in " + syno)
             adjacent_synos = get_synonyms(syno, recursive_level - 1, adj_per_syno)
             synos.extend(adjacent_synos)
     return synos
