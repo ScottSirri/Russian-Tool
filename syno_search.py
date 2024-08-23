@@ -19,6 +19,8 @@ def get_synonyms(word, recursive_level=0, cutoff=99999):
     html_doc = r.text
     soup = BeautifulSoup(html_doc, 'html.parser')
     syno_frame = soup.find("div", "senses")
+    if syno_frame == None:
+        return []
     links = syno_frame.find_all("a")
     synos = []
     for syno_a in links:

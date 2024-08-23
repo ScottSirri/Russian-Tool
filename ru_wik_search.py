@@ -76,6 +76,8 @@ def is_valid_elem(elem):
 def next_elem(elem):
     elem = elem.next_sibling
     while not is_valid_elem(elem):
+        if elem == None:
+            return None
         elem = elem.next_sibling
     return elem
 

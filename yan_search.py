@@ -6,7 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, NoSuchElementException
 
 try: 
     from BeautifulSoup import BeautifulSoup
@@ -63,8 +63,13 @@ def search_exs(query):
             button_available = False
     
     html_doc = driver.page_source
-    #print("search_exs: HTML DOC LEN: "  + str(len(html_doc)))
     soup = BeautifulSoup(html_doc, 'html.parser')
+    error = soup.find_all(string="Couldn't load examples for that query")
+
+    if len(error) > 0:
+        print("search_exs: No examples found for query on Yandex")
+        return []
+
     ex_elems = soup.find_all("div", {"class" : "HPdYZk2E3bjTdcGIYdld"})
     if len(ex_elems) == 0:
         print("search_exs: No example sentences found in HTML doc")

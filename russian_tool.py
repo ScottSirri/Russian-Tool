@@ -1,5 +1,7 @@
-import sys
-import en_wik_search, ru_wik_search, yan_search, freq_processing, syno_search
+import sys, my_translate
+import en_wik_search, ru_wik_search, syno_search
+import yan_search
+import freq_processing
 import pymarc.marc8
 
 
@@ -53,8 +55,10 @@ for line in en_defns:
 print()
 
 print("\nRussian Definitions:")
-for line in ru_defns:
-    print("\t" + line)
+for i in range(len(ru_defns)):
+    defn_ru = ru_defns[i]
+    defn_en = my_translate.translate(defn_ru)
+    print("\t" + defn_ru + " = [machine translation] " + defn_en)
 print()
 
 
@@ -123,12 +127,13 @@ for i in range(min(num_synos, len(sorted_synos))):
         else:
             # TODO : Insert machine translations of words/phrases not found in Wiktionary
             # (with an asterisk denoting it's a machine translation)
-            print("\t" + syno)
+            defn_str = my_translate.translate(syno)
+            print("\t" + syno + " = [machine translation] " + defn_str)
 print()
 
 print("\nExample sentences:")
 exs = yan_search.search_exs(query_word)
-for i in range(10):
+for i in range(min(10, len(exs))):
     ex = exs[i]
     if ex[0][len(ex[0]) - 1] == ".":
         ex[0] = ex[0][:len(ex[0]) - 1]
