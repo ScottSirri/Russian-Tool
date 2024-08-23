@@ -22,7 +22,8 @@ url_base_wiktionary = 'https://en.wiktionary.org/wiki/'
 # attribute 'class' set to "mw-heading2". This returns whether the current
 # has that, i.e., whether we've overflowed to the next language.
 def on_the_next_language(elem):
-    if "class" in elem.attrs and "mw-heading2" in elem["class"]:
+    if elem_is_contains(elem, "class", "mw-heading2"):
+        #if "class" in elem.attrs and "mw-heading2" in elem["class"]:
         return True
     return False
 
@@ -31,7 +32,8 @@ def on_the_next_language(elem):
 # handle these, and throw the rest into a grab bag
 def on_special_subsection(elem):
     # TODO : May be worth implementing handling of mw-heading3 elements as well
-    if "class" in elem.attrs and "mw-heading4" in elem["class"]: 
+    if elem_is_contains(elem, "class", "mw-heading4"):
+        #if "class" in elem.attrs and "mw-heading4" in elem["class"]: 
         return True
     return False
 

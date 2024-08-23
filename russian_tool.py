@@ -1,5 +1,5 @@
 import sys
-import wik_search, yan_search, freq_processing, syno_search
+import en_wik_search, ru_wik_search, yan_search, freq_processing, syno_search
 import pymarc.marc8
 
 
@@ -27,40 +27,40 @@ query_word = 'яблоко'
 if len(sys.argv) > 1:
     query_word = sys.argv[1]
 
-# Scrape the Wiktionary page for the query word
-info = wik_search.search(query_word)
+# Scrape the English Wiktionary page for the query word
+info = en_wik_search.search(query_word)
 if info == None:
     print("wik_search returned None")
     sys.exit()
 
-defns = info['defns']
-decls = info['decls']
-conjs = info['conjs']
-misc  = info['misc']
+en_defns = info['defns']
+en_decls = info['decls']
+en_conjs = info['conjs']
+en_misc  = info['misc']
 
-print("\nDefinitions:")
-for line in defns:
+print("\nEnglish Definitions:")
+for line in en_defns:
     print("\t" + line)
 print()
 
-if len(decls) > 0:
-    print("\nDeclensions:")
-    for line in decls:
+if len(en_decls) > 0:
+    print("\nEnglish Declensions:")
+    for line in en_decls:
         print("\t" + line)
     print()
 
-if len(conjs) > 0:
-    print("\nConjugations:")
-    for line in conjs:
+if len(en_conjs) > 0:
+    print("\nEnglish Conjugations:")
+    for line in en_conjs:
         print("\t" + line)
     print()
 
 # TODO : Create a second copy of the string where every Russian word's 
 # frequency is printed after it in parentheses, and then the viewier can 
 # toggle between the views.
-if len(misc) > 0:
-    print("\nMisc:")
-    for line in misc:
+if len(en_misc) > 0:
+    print("\nEnglish Misc:")
+    for line in en_misc:
         if line == NEW_SEC:
             print()
         else:
@@ -73,12 +73,10 @@ print(f"Frequency of word: %d" % freq)
 synos = syno_search.get_synonyms(query_word, synonym_num_recursive_levels,
                                  synonyms_cutoff)
 sorted_synos = []
-print("num synos: " + str(len(synos)))
 for syno in synos:
     freq = freq_processing.get_freq(syno)
     if freq > 0:
         sorted_synos.append([freq, syno])
-print("num sorted synos: " + str(len(sorted_synos)))
 
 def s(elem):
     return elem[0]
@@ -93,7 +91,7 @@ for i in range(min(num_synos, len(sorted_synos))):
     if ((i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno)
         and syno != query_word):
         
-        syno_defns = wik_search.search_defn(syno)
+        syno_defns = en_wik_search.search_defn(syno)
 
         if syno_defns != None:
             defn_str = ""
