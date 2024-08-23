@@ -27,21 +27,37 @@ query_word = 'яблоко'
 if len(sys.argv) > 1:
     query_word = sys.argv[1]
 
+en_defns = []
+en_decls = []
+en_conjs = []
+en_misc  = []
+ru_defns = []
+
 # Scrape the English Wiktionary page for the query word
 info = en_wik_search.search(query_word)
+ru_defns = ru_wik_search.search_defn(query_word)
 if info == None:
-    print("wik_search returned None")
-    sys.exit()
-
-en_defns = info['defns']
-en_decls = info['decls']
-en_conjs = info['conjs']
-en_misc  = info['misc']
+    print("en_wik_search.search returned None")
+    if ru_defns == None:
+        print("ru_wik_search.search returned None")
+        sys.exit()
+else:
+    en_defns = info['defns']
+    en_decls = info['decls']
+    en_conjs = info['conjs']
+    en_misc  = info['misc']
 
 print("\nEnglish Definitions:")
 for line in en_defns:
     print("\t" + line)
 print()
+
+print("\nRussian Definitions:")
+for line in ru_defns:
+    print("\t" + line)
+print()
+
+
 
 if len(en_decls) > 0:
     print("\nEnglish Declensions:")

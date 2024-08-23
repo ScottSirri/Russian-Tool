@@ -3,8 +3,10 @@ import sys
 
 try: 
     from BeautifulSoup import BeautifulSoup
+    from bs4 import Tag, NavigableString
 except ImportError:
-    from bs4 import BeautifulSoup
+    print("ImportError BeautifulSoup")
+    from bs4 import Tag, NavigableString, BeautifulSoup
 
 # Oooooo magic numbers :o
 DECL = 1001
@@ -23,7 +25,6 @@ url_base_wiktionary = 'https://en.wiktionary.org/wiki/'
 # has that, i.e., whether we've overflowed to the next language.
 def on_the_next_language(elem):
     if elem_is_contains(elem, "class", "mw-heading2"):
-        #if "class" in elem.attrs and "mw-heading2" in elem["class"]:
         return True
     return False
 
@@ -33,7 +34,6 @@ def on_the_next_language(elem):
 def on_special_subsection(elem):
     # TODO : May be worth implementing handling of mw-heading3 elements as well
     if elem_is_contains(elem, "class", "mw-heading4"):
-        #if "class" in elem.attrs and "mw-heading4" in elem["class"]: 
         return True
     return False
 
@@ -62,8 +62,9 @@ def extract_defns(elem):
                 break
             line = line + kiddo.get_text()
 
-        line = line.strip()
-        lines.append(line)
+        if line != '':
+            line = line.strip()
+            lines.append(line)
 
     return lines
 
@@ -119,13 +120,13 @@ def get_all_ru_table_contents(table_elem):
     contents = []
 
     if not elem_is_contains(table_elem, 'class', 'NavFrame'):
-        print("Non-table element has been passed to get_all_ru_table_contents")
+        print("en Non-table element has been passed to get_all_ru_table_contents")
         return
 
     table_contents_elem = table_elem.find("div", "NavContent")
 
     if table_contents_elem == None:
-        print("table contents not found")
+        print("en table contents not found")
     else:
         ru_cells = table_contents_elem.find_all("span", lang="ru")
         for cell in ru_cells:
@@ -138,13 +139,13 @@ def get_body_ru_table_contents(table_elem):
     contents = []
 
     if not elem_is_contains(table_elem, 'class', 'NavFrame'):
-        print("Non-table element passed to get_body_ru_table_contents")
+        print("en Non-table element passed to get_body_ru_table_contents")
         return
 
     table_contents_elem = table_elem.find("div", "NavContent")
 
     if table_contents_elem == None:
-        print("table contents not found")
+        print("en table contents not found")
     else:
         body_cells = table_contents_elem.find_all("td")
         for cell in body_cells:
@@ -217,7 +218,7 @@ def search(word):
     defns = search_defn(word)
     ret = search_misc(word)
     if defns == None or ret == None:
-        print("search: search_defn and/or search_misc returned 'None'")
+        print("en search: search_defn and/or search_misc returned 'None'")
         return None
     ret['defns'] = defns
     return ret
@@ -231,7 +232,7 @@ def search_defn(word):
     try:
         r = requests.get(url_wiktionary)
     except:
-        print(f"search_defn: Link not valid (%s)" % url_wiktionary)
+        print(f"en search_defn: Link not valid (%s)" % url_wiktionary)
         sys.exit()
     html_doc = r.text
 
@@ -284,7 +285,7 @@ def search_misc(word):
     try:
         r = requests.get(url_wiktionary)
     except:
-        print(f"search_defn: Link not valid (%s)" % url_wiktionary)
+        print(f"en search_defn: Link not valid (%s)" % url_wiktionary)
         sys.exit()
     html_doc = r.text
 
@@ -300,7 +301,7 @@ def search_misc(word):
     russian_sec_search = soup.find_all(id="Russian")
 
     if len(russian_sec_search) < 1:
-        print("search_misc: Russian section not found")
+        print("en search_misc: Russian section not found")
         return
 
     # Goes up one level to get out of the Russian header element
@@ -329,13 +330,13 @@ def search_misc(word):
             if type_subsection == DECL:
                 new_decls = extract_decl(current_elem)
                 if new_decls == None:
-                    print("search_misc: extract_decl returned None")
+                    print("en search_misc: extract_decl returned None")
                     return None
                 decls.extend(new_decls)
             elif type_subsection == CONJ:
                 new_conjs = extract_conj(current_elem)
                 if new_conjs == None:
-                    print("search_misc: extract_conj returned None")
+                    print("en search_misc: extract_conj returned None")
                     return None
                 conjs.extend(new_conjs)
         else:
