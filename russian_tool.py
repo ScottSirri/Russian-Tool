@@ -42,7 +42,9 @@ if info == None:
     print("en_wik_search.search returned None")
     if ru_defns == None:
         print("ru_wik_search.search returned None")
-        sys.exit()
+        en_defn = "[machine translation] " + my_translate.translate(query_word)
+        en_defns.append(en_defn)
+        ru_defns = []
 else:
     en_defns = info['defns']
     en_decls = info['decls']
