@@ -3,19 +3,7 @@ import en_wik_search, ru_wik_search, syno_search
 import yan_search
 import freq_processing
 import pymarc.marc8
-from tkinter import *
-from tkinter import ttk
 
-root = Tk()
-frm = ttk.Frame(root, padding=10)
-frm.grid()
-ttk.Label(frm, text="Hello World!").grid(column=0, row=0)
-ttk.Button(frm, text="Quit", command=root.destroy).grid(column=1, row=0)
-root.mainloop()
-
-
-print("Exited mainloop")
-sys.exit()
 
 # Oooooo magic numbers :o
 DECL = 1001
