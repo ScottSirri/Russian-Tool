@@ -1,4 +1,4 @@
-import sys, my_translate
+import sys, my_translate, img_scrape
 import en_wik_search, ru_wik_search, syno_search
 import yan_search
 import freq_processing
@@ -135,8 +135,12 @@ print()
 
 print("\nExample sentences:")
 exs = yan_search.search_exs(query_word)
+
 for i in range(min(10, len(exs))):
     ex = exs[i]
     if ex[0][len(ex[0]) - 1] == ".":
         ex[0] = ex[0][:len(ex[0]) - 1]
     print("\t" + ex[0] + " = " + ex[1])
+
+out_dir = img_scrape.get_imgs(query_word)
+print("Downloaded images available in " + out_dir)
