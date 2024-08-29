@@ -137,7 +137,8 @@ def search_defn(word):
             break
 
         if on_definitions(current_elem):
-            current_elem = next_elem(current_elem)
+            while not is_valid_elem(current_elem) or current_elem.name != "ol":
+                current_elem = next_elem(current_elem)
             assert current_elem.name == "ol"
             new_defns = extract_defns(current_elem)
             defns.extend(new_defns)

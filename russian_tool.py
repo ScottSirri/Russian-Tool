@@ -1,11 +1,13 @@
 import sys, my_translate, img_scrape
 import en_wik_search, ru_wik_search, syno_search
+from en_wik_search import NEW_SEC
 import yan_search
 import freq_processing
 import pymarc.marc8
 from tkinter import *
 from tkinter import ttk
 
+"""
 root = Tk()
 frm = ttk.Frame(root, padding=10)
 frm.grid()
@@ -16,16 +18,7 @@ root.mainloop()
 
 print("Exited mainloop")
 sys.exit()
-
-# Oooooo magic numbers :o
-DECL = 1001
-CONJ = 1002
-OTHR = 1003
-NEW_SEC = 1004
-
-section_codes = { DECL : "DECL", 
-                  CONJ : "CONJ",
-                  OTHR : "OTHR"}
+"""
 
 # When searching for synonyms of a word, how many recursive levels does the 
 # search go (e.g., do you include synonyms of synonyms)
@@ -139,8 +132,6 @@ for i in range(min(num_synos, len(sorted_synos))):
         elif syno_defns != None:
             print("\t" + syno + " = " + defn_str)
         else:
-            # TODO : Insert machine translations of words/phrases not found in Wiktionary
-            # (with an asterisk denoting it's a machine translation)
             defn_str = my_translate.translate(syno)
             print("\t" + syno + " = [machine translation] " + defn_str)
 print()

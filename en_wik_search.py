@@ -12,7 +12,7 @@ except ImportError:
 DECL = 1001
 CONJ = 1002
 OTHR = 1003
-NEW_SEC = 1004
+NEW_SEC = 1005
 
 section_codes = { DECL : "DECL", 
                   CONJ : "CONJ",
@@ -57,18 +57,18 @@ def extract_defns(elem):
             continue
         line = ''
         for kiddo in li.children:
-            if(kiddo.name != 'a' and kiddo.name != None 
-                            and kiddo.name != 'span'):
-                break
+            if elem_is_contains(kiddo, "class", "nyms-toggle") or kiddo.name=="style" or kiddo.name == "dl" or kiddo.name == "ul":
+                continue
             line = line + kiddo.get_text()
 
         if line != '':
             line = line.strip()
+            line = line.replace("\n", " ")
             lines.append(line)
 
     return lines
 
-# Returns the section type of the passed element
+# Returns the section type of the passed mw-heading4 element
 def get_subsection_type(elem):
 
     h4_elems = elem.find_all("h4")
@@ -172,6 +172,13 @@ def next_elem(elem):
         elem = elem.next_sibling
     return elem
 
+# Returns the previous sibling element (ignoring invalid elements)
+def prev_elem(elem):
+    elem = elem.previous_sibling
+    while not is_valid_elem(elem):
+        elem = elem.previous_sibling
+    return elem
+
 # Returns all contents of the table following the passed mw-heading4 element 
 def extract_decl(elem):
 
@@ -209,7 +216,7 @@ def extract_ul(elem):
     contents = []
     lis = elem.find_all("li")
     for li in lis:
-        contents.append(li.get_text())
+        contents.append(str(li.get_text()))
     return contents
 
 
@@ -269,6 +276,15 @@ def search_defn(word):
             break
 
         if on_definitions(current_elem):
+            # Right before definitions is usually a headline containing
+            # useful misc info like aspectual partners, diminuitives, etc
+            headword_elem = prev_elem(current_elem)
+            headword_list = headword_elem.find_all("span", "headword-line")
+            if len(headword_list) > 0:
+                headword = headword_list[0].get_text()
+                headword = headword.replace("• ","")
+                defns.append(headword)
+
             new_defns = extract_defns(current_elem)
             defns.extend(new_defns)
 
@@ -345,7 +361,7 @@ def search_misc(word):
                 uls.append(current_elem)
 
             for ul in uls:
-                new_misc = extract_ul(current_elem)
+                new_misc = extract_ul(ul)
                 # Manually omitting a common and uninteresting ul element
                 if len(new_misc) >= 1 and ("IPA" in new_misc[0] 
                                            or "Audio:" in new_misc[0]):
