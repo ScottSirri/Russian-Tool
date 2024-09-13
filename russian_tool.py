@@ -7,18 +7,6 @@ import pymarc.marc8
 from tkinter import *
 from tkinter import ttk
 
-"""
-root = Tk()
-frm = ttk.Frame(root, padding=10)
-frm.grid()
-ttk.Label(frm, text="Hello World!").grid(column=0, row=0)
-ttk.Button(frm, text="Quit", command=root.destroy).grid(column=1, row=0)
-root.mainloop()
-
-
-print("Exited mainloop")
-sys.exit()
-"""
 
 # When searching for synonyms of a word, how many recursive levels does the 
 # search go (e.g., do you include synonyms of synonyms)
@@ -83,7 +71,7 @@ if len(en_conjs) > 0:
     print()
 
 # TODO : Create a second copy of the string where every Russian word's 
-# frequency is printed after it in parentheses, and then the viewier can 
+# frequency is printed after it in parentheses, and then the viewer can 
 # toggle between the views.
 if len(en_misc) > 0:
     print("\nEnglish Misc:")
