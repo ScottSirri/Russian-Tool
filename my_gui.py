@@ -83,9 +83,52 @@ class GUI:
         ttk.Button(mainframe, text="Submit", command=self.button_submit).grid(column=3, row=9, pady=20)
 
     def button_generate(self):
+
         print("generate")
+
         query = self.stringvar_query.get()
         print(query)
+
+        # Obtain fields
+        card_fields = russian_tool.generate_card_fields(query)
+
+        # Unpack fields
+        defns_ru = card_fields[russian_tool.DEFNS_RU]
+        defns_en = card_fields[russian_tool.DEFNS_EN]
+        decls = card_fields[russian_tool.DECLS]
+        conjs = card_fields[russian_tool.CONJS]
+        freq = card_fields[russian_tool.FREQ]
+        examples = card_fields[russian_tool.EXAMPLES]
+        imgs_dir = card_fields[russian_tool.IMGS_DIR]
+        synos = card_fields[russian_tool.SYNOS]
+        misc = card_fields[russian_tool.MISC]
+
+        if defns_ru != None:
+            str_defns_ru = str(defns_ru)
+            self.scrl_gen_defns_ru.insert(INSERT, str_defns_ru)
+        if defns_en != None:
+            str_defns_en = str(defns_en)
+            self.scrl_gen_defns_en.insert(INSERT, str_defns_en)
+        if decls != None:
+            str_decls = str(decls)
+            self.scrl_gen_conjs_decls.insert(INSERT, str_decls)
+        if conjs != None:
+            str_conjs = str(conjs)
+            self.scrl_gen_conjs_decls.insert(INSERT, str_conjs)
+        if freq != None:
+            str_freq = str(freq)
+        if examples != None:
+            str_examples = str(examples)
+            self.scrl_gen_examples.insert(INSERT, str_examples)
+        if imgs_dir != None:
+            str_imgs_dir = str(imgs_dir)
+        if synos != None:
+            str_synos = str(synos)
+            self.scrl_gen_synos.insert(INSERT, str_synos)
+        if misc != None:
+            str_misc = str(misc)
+            self.scrl_gen_related.insert(INSERT, str_misc)
+
 
     def button_clear(self):
         self.stringvar_query.set("")
