@@ -4,9 +4,6 @@ from en_wik_search import NEW_SEC
 import yan_search
 import freq_processing
 import pymarc.marc8
-from tkinter import *
-from tkinter import ttk
-import my_gui
 
 # When searching for synonyms of a word, how many recursive levels does the 
 # search go (e.g., do you include synonyms of synonyms)
@@ -16,128 +13,118 @@ synonyms_cutoff = 999
 # Number of synonyms that will be printed
 num_synos = 40
 
-root = Tk()
-gui = my_gui.GUI(root)
-root.mainloop()
-print("russian_tool mainloop ended")
-sys.exit()
+DEFNS_EN = "defns_en"
+DEFNS_RU = "defns_ru"
+DECLS = "decls"
+CONJS = "conjs"
+FREQ = "freq"
+EXAMPLES = "examples"
+IMGS_DIR = "imgs_dir"
+SYNOS = "synos"
+MISC = "misc"
 
-# Arbitrary default query word
-query_word = 'яблоко'
+debug = True
 
-if len(sys.argv) > 1:
-    query_word = sys.argv[1]
+def debug_print(string):
+    if debug == True:
+        print(string)
 
-en_defns = []
-en_decls = []
-en_conjs = []
-en_misc  = []
-ru_defns = []
+def generate_card_fields(query_word='яблоко'):
 
-# Scrape the English Wiktionary page for the query word
-info = en_wik_search.search(query_word)
-ru_defns = ru_wik_search.search_defn(query_word)
-if info == None:
-    print("en_wik_search.search returned None")
-    if ru_defns == None:
-        print("ru_wik_search.search returned None")
-        en_defn = "[machine translation] " + my_translate.translate(query_word)
-        en_defns.append(en_defn)
-        ru_defns = []
-else:
-    en_defns = info['defns']
-    en_decls = info['decls']
-    en_conjs = info['conjs']
-    en_misc  = info['misc']
+    out = {DEFNS_EN : None, FREQ : None , DEFNS_RU : None, DECLS : None, CONJS : None, 
+           MISC : None, SYNOS : None, EXAMPLES : None , IMGS_DIR : None}
 
-print("\nEnglish Definitions:")
-for line in en_defns:
-    print("\t" + line)
-print()
+    # Scrape English definitions
+    info = en_wik_search.search(query_word)
+    if info != None:
+        out[DEFNS_EN] = info['defns']
+        out[DECLS]    = info['decls']
+        out[CONJS]    = info['conjs']
+        out[MISC]     = info['misc']
+    debug_print("Finished scraping English definitions")
 
-print("\nRussian Definitions:")
-for i in range(len(ru_defns)):
-    defn_ru = ru_defns[i]
-    defn_en = my_translate.translate(defn_ru)
-    print("\t" + defn_ru + " = [machine translation] " + defn_en)
-print()
+    # Scrape Russian definitions
+    ru_defns_raw = ru_wik_search.search_defn(query_word)
+    ru_defns_trans = []
+    if ru_defns_raw != None:
+        for i in range(len(ru_defns_raw)):
+            defn_ru = ru_defns_raw[i]
+            defn_en = my_translate.translate(defn_ru)
+            defn_trans = defn_ru + " = [machine translation] " + defn_en
+            ru_defns_trans.append(defn_trans)
+    else:
+        ru_defns_trans = None
+    out[DEFNS_RU] = ru_defns_trans
+    debug_print("Finished scraping Russian definitions")
 
+    # Determine word frequency
+    freq = freq_processing.get_freq(query_word)
+    out[FREQ] = freq
+    debug_print("Found word frequency")
 
+    # Identify synonyms and their respective definitions
+    synos = syno_search.get_synonyms(query_word, synonym_num_recursive_levels,
+                                     synonyms_cutoff)
+    debug_print("Obtained synonyms")
+    sorted_synos = []
+    for syno in synos:
+        freq = freq_processing.get_freq(syno)
+        if freq > 0:
+            sorted_synos.append([freq, syno])
 
-if len(en_decls) > 0:
-    print("\nEnglish Declensions:")
-    for line in en_decls:
-        print("\t" + line)
-    print()
+    sorted_synos.sort(key=sort_first_elem)
+    synos_defns = []
 
-if len(en_conjs) > 0:
-    print("\nEnglish Conjugations:")
-    for line in en_conjs:
-        print("\t" + line)
-    print()
-
-# TODO : Create a second copy of the string where every Russian word's 
-# frequency is printed after it in parentheses, and then the viewer can 
-# toggle between the views.
-if len(en_misc) > 0:
-    print("\nEnglish Misc:")
-    for line in en_misc:
-        if line == NEW_SEC:
-            print()
-        else:
-            print("\t" + line)
-    print()
-
-freq = freq_processing.get_freq(query_word)
-print(f"Frequency of word: %d" % freq)
-
-synos = syno_search.get_synonyms(query_word, synonym_num_recursive_levels,
-                                 synonyms_cutoff)
-sorted_synos = []
-for syno in synos:
-    freq = freq_processing.get_freq(syno)
-    if freq > 0:
-        sorted_synos.append([freq, syno])
-
-def s(elem):
-    return elem[0]
-sorted_synos.sort(key=s)
-
-for i in range(min(num_synos, len(sorted_synos))):
-    
-    syno_tup = sorted_synos[i]
-    freq = int(syno_tup[0])
-    syno = syno_tup[1]
-
-    if ((i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno)
-        and syno != query_word):
+    for i in range(min(num_synos, len(sorted_synos))):
         
-        syno_defns = en_wik_search.search_defn(syno)
+        syno_tup = sorted_synos[i]
+        freq = int(syno_tup[0])
+        syno = syno_tup[1]
 
-        if syno_defns != None:
-            defn_str = ""
-            for defn in syno_defns:
-                defn_str = defn_str + defn + "; "
-            defn_str = defn_str[:len(defn_str)-2]
+        if ((i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno)
+            and syno != query_word):
+            
+            syno_defns = en_wik_search.search_defn(syno)
 
-        freq_str = str(freq).rjust(5, " ")
-        if freq <= 20000 and syno_defns != None:
-            print("\t" + freq_str + ": " + syno + " = " + defn_str)
-        elif syno_defns != None:
-            print("\t" + syno + " = " + defn_str)
-        else:
-            defn_str = my_translate.translate(syno)
-            print("\t" + syno + " = [machine translation] " + defn_str)
-print()
+            # Merge synonym definitions into a single line
+            if syno_defns != None:
+                defn_str = ""
+                for defn in syno_defns:
+                    defn_str = defn_str + defn + "; "
+                defn_str = defn_str[:len(defn_str)-2]
 
-print("\nExample sentences:")
-exs = yan_search.search_exs(query_word)
+            # Combine synonym and definition string into a single line
+            syno_defn = ""
+            if syno_defns != None:
+                syno_defn = syno + " = " + defn_str
+            else:
+                defn_str = my_translate.translate(syno)
+                syno_defn = syno + " = [machine translation] " + defn_str
 
-for i in range(min(10, len(exs))):
-    ex = exs[i]
-    if ex[0][len(ex[0]) - 1] == ".":
-        ex[0] = ex[0][:len(ex[0]) - 1]
-    print("\t" + ex[0] + " = " + ex[1])
+            synos_defns.append(syno_defn)
 
-out_dir = img_scrape.get_imgs(query_word)
-print("Downloaded images available in " + out_dir)
+    out[SYNOS] = synos_defns
+    debug_print("\tTranslated and formatted synonyms")
+
+    # Scrape and format example sentences
+    exs = yan_search.search_exs(query_word)
+    exs_strs = []
+
+    for i in range(min(10, len(exs))):
+        ex = exs[i]
+        if ex[0][len(ex[0]) - 1] == ".":
+            ex[0] = ex[0][:len(ex[0]) - 1]
+        ex_str = ex[0] + " = " + ex[1]
+        exs_strs.append(ex_str)
+    out[EXAMPLES] = exs_strs
+    debug_print("Scraped example sentences")
+
+    # Scrape images
+    out_dir = img_scrape.get_imgs(query_word)
+    out[IMGS_DIR] = out_dir
+    debug_print("Scraped images")
+
+    return out
+
+def sort_first_elem(elem):
+    return elem[0]
