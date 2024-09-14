@@ -6,7 +6,7 @@ import freq_processing
 import pymarc.marc8
 from tkinter import *
 from tkinter import ttk
-
+import my_gui
 
 # When searching for synonyms of a word, how many recursive levels does the 
 # search go (e.g., do you include synonyms of synonyms)
@@ -15,6 +15,12 @@ synonym_num_recursive_levels = 0
 synonyms_cutoff = 999
 # Number of synonyms that will be printed
 num_synos = 40
+
+root = Tk()
+gui = my_gui.GUI(root)
+root.mainloop()
+print("russian_tool mainloop ended")
+sys.exit()
 
 # Arbitrary default query word
 query_word = 'яблоко'

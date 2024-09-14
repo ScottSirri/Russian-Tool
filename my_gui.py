@@ -3,6 +3,7 @@ from tkinter import ttk
 import ttkbootstrap
 from ttkbootstrap.constants import *
 from tkinter.scrolledtext import ScrolledText
+import russian_tool
 
 WIDTH = 40
 SCRL_HEIGHT = 5
@@ -27,20 +28,6 @@ class GUI:
 
         self.stringvar_query = StringVar()
         self.stringvar_quick = StringVar()
-        """
-        self.stringvar_gen_defns_en = StringVar()
-        self.stringvar_gen_defns_ru = StringVar()
-        self.stringvar_gen_conjs_decls = StringVar()
-        self.stringvar_gen_examples = StringVar()
-        self.stringvar_gen_related = StringVar()
-        self.stringvar_gen_synos = StringVar()
-        self.stringvar_out_ru = StringVar()
-        self.stringvar_out_en = StringVar()
-        self.stringvar_out_conjs_decls = StringVar()
-        self.stringvar_out_examples = StringVar()
-        self.stringvar_out_related = StringVar()
-        self.stringvar_out_synos = StringVar()
-        """
 
         self.entry_query = ttk.Entry(mainframe, textvariable=self.stringvar_query, width=SCRL_WIDTH)
         self.entry_quick = ttk.Entry(mainframe, textvariable=self.stringvar_quick, width=SCRL_WIDTH)
@@ -97,6 +84,8 @@ class GUI:
 
     def button_generate(self):
         print("generate")
+        query = self.stringvar_query.get()
+        print(query)
 
     def button_clear(self):
         self.stringvar_query.set("")
@@ -121,45 +110,7 @@ class GUI:
     def button_submit(self):
         print("submit")
 
-
-class FeetToMeters:
-
-    def __init__(self, root):
-
-        root.title("Feet to Meters")
-
-        mainframe = ttk.Frame(root, padding="3 3 12 12")
-        mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
-        root.columnconfigure(0, weight=1)
-        root.rowconfigure(0, weight=1)
-       
-        self.feet = StringVar()
-        feet_entry = ttk.Entry(mainframe, width=7, textvariable=self.feet)
-        feet_entry.grid(column=2, row=1, sticky=(W, E))
-        self.meters = StringVar()
-
-        ttk.Label(mainframe, textvariable=self.meters).grid(column=2, row=2, sticky=(W, E))
-        ttk.Button(mainframe, text="Calculate", command=self.calculate).grid(column=3, row=3, sticky=W)
-
-        ttk.Label(mainframe, text="feet").grid(column=3, row=1, sticky=W)
-        ttk.Label(mainframe, text="is equivalent to").grid(column=1, row=2, sticky=E)
-        ttk.Label(mainframe, text="meters").grid(column=3, row=2, sticky=W)
-
-        for child in mainframe.winfo_children(): 
-            child.grid_configure(padx=5, pady=5)
-
-        feet_entry.focus()
-        root.bind("<Return>", self.calculate)
-        
-    def calculate(self, *args):
-        try:
-            value = float(self.feet.get())
-            self.meters.set(int(0.3048 * value * 10000.0 + 0.5)/10000.0)
-        except ValueError:
-            pass
-
-root = Tk()
-#FeetToMeters(root)
-GUI(root)
-root.mainloop()
-print("Exited application")
+#root = Tk()
+#GUI(root)
+#root.mainloop()
+#print("Exited application")
