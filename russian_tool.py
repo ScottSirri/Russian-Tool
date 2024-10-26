@@ -10,9 +10,9 @@ import threading
 # search go (e.g., do you include synonyms of synonyms)
 synonym_num_recursive_levels = 0
 # Upper limit on the number of synonyms that may be read during synonym search
-synonyms_cutoff = 999
+synonyms_cutoff = 50
 # Number of synonyms that will be printed
-num_synos = 20
+num_synos = 999
 
 DEFNS_EN = "defns_en"
 DEFNS_RU = "defns_ru"
@@ -24,7 +24,7 @@ IMGS_DIR = "imgs_dir"
 SYNOS = "synos"
 MISC = "misc"
 
-debug = True
+debug = False
 
 def debug_print(string):
     if debug == True:
@@ -54,12 +54,9 @@ def strip_accents(word):
 
     return word
 
-
-def quick_search(query_word='яблоко'):
-
-    print(f"BEFORE STRIPPING:{query_word}")
+def generate_field_en(query_word):
+    
     query_word = strip_accents(query_word)
-    print(f"AFTER STRIPPING:{query_word}")
 
     out = {DEFNS_EN : None, DECLS : None, CONJS : None, MISC : None}
 
@@ -70,32 +67,30 @@ def quick_search(query_word='яблоко'):
         out[DECLS]    = info['decls']
         out[CONJS]    = info['conjs']
         out[MISC]     = info['misc']
-    debug_print("Finished scraping English definitions")
 
     return out
 
-def generate_card_fields(query_word='яблоко'):
+def generate_field_exs(query_word):
 
-    print(f"BEFORE STRIPPING:{query_word}")
     query_word = strip_accents(query_word)
-    print(f"AFTER STRIPPING:{query_word}")
 
-    out = {DEFNS_EN : None, DECLS : None, CONJS : None, 
-           MISC : None, SYNOS : None, EXAMPLES : None}
+    # Scrape and format example sentences
+    exs = yan_search.search_exs(query_word)
+    exs_strs = []
 
-    # Scrape English definitions
-    info = en_wik_search.search(query_word)
-    if info != None:
-        out[DEFNS_EN] = info['defns']
-        out[DECLS]    = info['decls']
-        out[CONJS]    = info['conjs']
-        out[MISC]     = info['misc']
-    debug_print("Finished scraping English definitions")
+    for i in range(len(exs)):
+        ex = exs[i]
+        if ex[0][len(ex[0]) - 1] == ".":
+            ex[0] = ex[0][:len(ex[0]) - 1]
+        ex_str = ex[0] + " = " + ex[1]
+        exs_strs.append(ex_str)
 
-    # Determine word frequency
-    freq = freq_processing.get_freq(query_word)
-    out[FREQ] = freq
-    debug_print("Found word frequency")
+    print(len(exs_strs))
+    return exs_strs
+
+def generate_field_synos(query_word):
+
+    query_word = strip_accents(query_word)
 
     # Identify synonyms and their respective definitions
     synos = syno_search.get_synonyms(query_word, synonym_num_recursive_levels,
@@ -114,6 +109,7 @@ def generate_card_fields(query_word='яблоко'):
         
         syno_tup = sorted_synos[i]
         freq = int(syno_tup[0])
+        print(freq)
         syno = syno_tup[1]
 
         if ((i == len(sorted_synos) - 1 or sorted_synos[i+1][1] != syno)
@@ -131,36 +127,14 @@ def generate_card_fields(query_word='яблоко'):
             # Combine synonym and definition string into a single line
             syno_defn = ""
             if syno_defns != None:
-                syno_defn = syno + " = " + defn_str
+                syno_defn = f"[{freq}] " + syno + " = " + defn_str
             else:
                 defn_str = my_translate.translate(syno)
                 syno_defn = syno + " = [machine translation] " + defn_str
 
             synos_defns.append(syno_defn)
 
-    out[SYNOS] = synos_defns
-    debug_print("\tTranslated and formatted synonyms")
-
-    # Scrape and format example sentences
-    exs = yan_search.search_exs(query_word)
-    exs_strs = []
-
-    for i in range(min(10, len(exs))):
-        ex = exs[i]
-        if ex[0][len(ex[0]) - 1] == ".":
-            ex[0] = ex[0][:len(ex[0]) - 1]
-        ex_str = ex[0] + " = " + ex[1]
-        exs_strs.append(ex_str)
-    out[EXAMPLES] = exs_strs
-    debug_print("Scraped example sentences")
-
-    # Scrape images
-    task = threading.Thread(target=img_scrape.get_imgs, args=(query_word,40,))
-    task.start()
-    #out_dir = img_scrape.get_imgs(query_word)
-    debug_print("Scraping images")
-
-    return out
+    return synos_defns
 
 def sort_first_elem(elem):
     return elem[0]
