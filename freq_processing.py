@@ -23,6 +23,9 @@ def get_freq(query):
         print(query)
         print(f"get_freq: Invalid query type (%s)" % str(type(query)))
         return None
+    if query == "":
+        print("get_freq: Query empty")
+        return None
 
     query = query.strip()
     query = re.sub('\(', '', query)

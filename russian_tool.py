@@ -1,5 +1,5 @@
 import sys, my_translate, img_scrape
-import en_wik_search, ru_wik_search, syno_search
+import en_wik_search, syno_search
 from en_wik_search import NEW_SEC
 import yan_search
 import freq_processing
@@ -11,7 +11,7 @@ synonym_num_recursive_levels = 0
 # Upper limit on the number of synonyms that may be read during synonym search
 synonyms_cutoff = 999
 # Number of synonyms that will be printed
-num_synos = 40
+num_synos = 20
 
 DEFNS_EN = "defns_en"
 DEFNS_RU = "defns_ru"
@@ -29,10 +29,34 @@ def debug_print(string):
     if debug == True:
         print(string)
 
-def generate_card_fields(query_word='яблоко'):
+def strip_accents(word):
+    #
+    #
+    #
+    #
+    word.replace('á','')
+    word.replace('é','')
+    word.replace('и́','')
+    word.replace('ó','')
+    word.replace('у́','')
+    word.replace('ы́','')
+    word.replace('э́','')
+    word.replace('я́','')
+    word.replace('ю́','')
+    word.replace('á','')
+    word.replace('é','')
+    word.replace('и́','')
+    word.replace('ó','')
+    word.replace('у́','')
+    word.replace('ы́','')
+    word.replace('э́','')
+    word.replace('я́','')
+    word.replace('ю́','')
 
-    out = {DEFNS_EN : None, FREQ : None , DEFNS_RU : None, DECLS : None, CONJS : None, 
-           MISC : None, SYNOS : None, EXAMPLES : None , IMGS_DIR : None}
+
+def quick_search(query_word='яблоко'):
+
+    out = {DEFNS_EN : None, DECLS : None, CONJS : None, MISC : None}
 
     # Scrape English definitions
     info = en_wik_search.search(query_word)
@@ -43,19 +67,21 @@ def generate_card_fields(query_word='яблоко'):
         out[MISC]     = info['misc']
     debug_print("Finished scraping English definitions")
 
-    # Scrape Russian definitions
-    ru_defns_raw = ru_wik_search.search_defn(query_word)
-    ru_defns_trans = []
-    if ru_defns_raw != None:
-        for i in range(len(ru_defns_raw)):
-            defn_ru = ru_defns_raw[i]
-            defn_en = my_translate.translate(defn_ru)
-            defn_trans = defn_ru + " = [machine translation] " + defn_en
-            ru_defns_trans.append(defn_trans)
-    else:
-        ru_defns_trans = None
-    out[DEFNS_RU] = ru_defns_trans
-    debug_print("Finished scraping Russian definitions")
+    return out
+
+def generate_card_fields(query_word='яблоко'):
+
+    out = {DEFNS_EN : None, DECLS : None, CONJS : None, 
+           MISC : None, SYNOS : None, EXAMPLES : None , IMGS_DIR : None}
+
+    # Scrape English definitions
+    info = en_wik_search.search(query_word)
+    if info != None:
+        out[DEFNS_EN] = info['defns']
+        out[DECLS]    = info['decls']
+        out[CONJS]    = info['conjs']
+        out[MISC]     = info['misc']
+    debug_print("Finished scraping English definitions")
 
     # Determine word frequency
     freq = freq_processing.get_freq(query_word)

@@ -1,5 +1,7 @@
 import requests
 import sys
+import webbrowser
+import urllib.parse
 
 try: 
     from BeautifulSoup import BeautifulSoup
@@ -19,6 +21,7 @@ section_codes = { DECL : "DECL",
                   OTHR : "OTHR"}
 
 url_base_wiktionary = 'https://en.wiktionary.org/wiki/'
+url_ru_base_wiktionary = 'https://ru.wiktionary.org/wiki/'
 
 # The elements corresponding to the header for a new language contain the
 # attribute 'class' set to "mw-heading2". This returns whether the current
@@ -222,6 +225,12 @@ def extract_ul(elem):
 
 # Returns from Wiktionary the definitions and misc information for a word
 def search(word):
+    
+    url_open = url_base_wiktionary + urllib.parse.quote(word)
+    url_ru_open = url_ru_base_wiktionary + urllib.parse.quote(word)
+    webbrowser.open(url_open)
+    webbrowser.open(url_ru_open)
+
     defns = search_defn(word)
     ret = search_misc(word)
     if defns == None or ret == None:
@@ -287,7 +296,7 @@ def search_defn(word):
 
             new_defns = extract_defns(current_elem)
             defns.extend(new_defns)
-
+        
     return defns
 
 
