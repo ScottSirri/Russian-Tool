@@ -6,6 +6,7 @@ from tkinter.scrolledtext import ScrolledText
 import russian_tool
 import img_scrape
 import threading
+import time
 
 WIDTH = 40
 SCRL_HEIGHT = 8
@@ -16,6 +17,11 @@ IMGS_WIDTH = 20
 class GUI:
     
     def __init__(self, root):
+
+        program_start_time = time.time()
+        file_name = "out_files/russian_anki_out_" + str(int(program_start_time)) + ".txt"
+        self.out_file = open(file_name, "w+")
+
         root.title("Russian Anki Application")
         root.columnconfigure(0, weight=1)
         root.rowconfigure(0, weight=1)
@@ -41,7 +47,6 @@ class GUI:
         self.scrl_out_conjs_decls = ScrolledText(mainframe, height=SCRL_HEIGHT, width=SCRL_WIDTH)
         self.scrl_out_examples = ScrolledText   (mainframe, height=SCRL_HEIGHT, width=SCRL_WIDTH)
         self.scrl_out_related = ScrolledText    (mainframe, height=SCRL_HEIGHT, width=SCRL_WIDTH)
-        self.scrl_out_synos = ScrolledText      (mainframe, height=SCRL_HEIGHT, width=SCRL_WIDTH)
         
         self.entry_query.grid         (column=1, row=0, sticky=(W, E))
         self.scrl_gen_defns_en.grid   (column=1, row=1, sticky=(W, E))
@@ -54,7 +59,6 @@ class GUI:
         self.scrl_out_conjs_decls.grid(column=5, row=3, sticky=(W, E))
         self.scrl_out_examples.grid   (column=5, row=4, sticky=(W, E))
         self.scrl_out_related.grid    (column=5, row=5, sticky=(W, E))
-        self.scrl_out_synos.grid      (column=5, row=6, sticky=(W, E))
 
         ttk.Label(mainframe, text="Query:").grid(column=0, row=0, sticky=W)
         ttk.Label(mainframe, text="Generated Definitions (en):").grid(column=0, row=1, sticky=W)
@@ -67,7 +71,6 @@ class GUI:
         ttk.Label(mainframe, text="Out Conjugations/\nDeclensions Field:").grid(column=4, row=3, sticky=W)
         ttk.Label(mainframe, text="Out Examples Field:").grid(column=4, row=4, sticky=W)
         ttk.Label(mainframe, text="Out Related Field:").grid(column=4, row=5, sticky=W)
-        ttk.Label(mainframe, text="Out Synonyms Field:").grid(column=4, row=6, sticky=W)
 
         ttk.Button(mainframe, text="Img Search", command=self.button_img_search).grid(column=3, row=0, padx=10)
         ttk.Button(mainframe, text="Clear", command=self.button_clear).grid(column=4, row=0, padx=10)
@@ -150,7 +153,28 @@ class GUI:
             self.scrl_gen_related.insert(INSERT, str_misc)
 
     def button_submit(self):
-        print("submit")
+        print("[Submit]")
+        ru_out = self.scrl_out_ru.get("1.0", END)
+        en_out = self.scrl_out_en.get("1.0", END)
+        cd_out = self.scrl_out_conjs_decls.get("1.0", END)
+        ex_out = self.scrl_out_examples.get("1.0", END)
+        re_out = self.scrl_out_related.get("1.0", END)
+        if ru_out[len(ru_out) - 1] == '\n':
+            ru_out = ru_out[:len(ru_out)-1]
+        if en_out[len(en_out) - 1] == '\n':
+            en_out = en_out[:len(en_out)-1]
+        if cd_out[len(cd_out) - 1] == '\n':
+            cd_out = cd_out[:len(cd_out)-1]
+        if ex_out[len(ex_out) - 1] == '\n':
+            ex_out = ex_out[:len(ex_out)-1]
+        if re_out[len(re_out) - 1] == '\n':
+            re_out = re_out[:len(re_out)-1]
+        out = f"{ru_out}|{en_out}|{cd_out}|{ex_out}|{re_out}"
+        out = out.replace("\n","<br>")
+        out += "\n"
+        self.out_file.write(out)
+        self.out_file.flush()
+        print(f"Wrote '{out}'")
 
 #root = Tk()
 #GUI(root)
