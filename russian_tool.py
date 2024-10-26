@@ -4,6 +4,7 @@ from en_wik_search import NEW_SEC
 import yan_search
 import freq_processing
 import pymarc.marc8
+import threading
 
 # When searching for synonyms of a word, how many recursive levels does the 
 # search go (e.g., do you include synonyms of synonyms)
@@ -30,31 +31,35 @@ def debug_print(string):
         print(string)
 
 def strip_accents(word):
-    #
-    #
-    #
-    #
-    word.replace('á','')
-    word.replace('é','')
-    word.replace('и́','')
-    word.replace('ó','')
-    word.replace('у́','')
-    word.replace('ы́','')
-    word.replace('э́','')
-    word.replace('я́','')
-    word.replace('ю́','')
-    word.replace('á','')
-    word.replace('é','')
-    word.replace('и́','')
-    word.replace('ó','')
-    word.replace('у́','')
-    word.replace('ы́','')
-    word.replace('э́','')
-    word.replace('я́','')
-    word.replace('ю́','')
+
+    word = word.replace('а́','а')
+    word = word.replace('é','е')
+    word = word.replace('и́','и')
+    word = word.replace('ó','о')
+    word = word.replace('у́','у')
+    word = word.replace('ы́','ы')
+    word = word.replace('э́','э')
+    word = word.replace('я́','я')
+    word = word.replace('ю́','ю')
+    
+    word = word.replace('А́','А')
+    word = word.replace('Е́','Е')
+    word = word.replace('И́','И')
+    word = word.replace('О́','О')
+    word = word.replace('У́','У')
+    word = word.replace('Ы́','Ы')
+    word = word.replace('Э́','Э')
+    word = word.replace('Ю́','Ю')
+    word = word.replace('Я́','Я')
+
+    return word
 
 
 def quick_search(query_word='яблоко'):
+
+    print(f"BEFORE STRIPPING:{query_word}")
+    query_word = strip_accents(query_word)
+    print(f"AFTER STRIPPING:{query_word}")
 
     out = {DEFNS_EN : None, DECLS : None, CONJS : None, MISC : None}
 
@@ -71,8 +76,12 @@ def quick_search(query_word='яблоко'):
 
 def generate_card_fields(query_word='яблоко'):
 
+    print(f"BEFORE STRIPPING:{query_word}")
+    query_word = strip_accents(query_word)
+    print(f"AFTER STRIPPING:{query_word}")
+
     out = {DEFNS_EN : None, DECLS : None, CONJS : None, 
-           MISC : None, SYNOS : None, EXAMPLES : None , IMGS_DIR : None}
+           MISC : None, SYNOS : None, EXAMPLES : None}
 
     # Scrape English definitions
     info = en_wik_search.search(query_word)
@@ -146,9 +155,10 @@ def generate_card_fields(query_word='яблоко'):
     debug_print("Scraped example sentences")
 
     # Scrape images
-    out_dir = img_scrape.get_imgs(query_word)
-    out[IMGS_DIR] = out_dir
-    debug_print("Scraped images")
+    task = threading.Thread(target=img_scrape.get_imgs, args=(query_word,40,))
+    task.start()
+    #out_dir = img_scrape.get_imgs(query_word)
+    debug_print("Scraping images")
 
     return out
 

@@ -105,13 +105,9 @@ class GUI:
         decls = card_fields[russian_tool.DECLS]
         conjs = card_fields[russian_tool.CONJS]
         examples = card_fields[russian_tool.EXAMPLES]
-        imgs_dir = card_fields[russian_tool.IMGS_DIR]
         synos = card_fields[russian_tool.SYNOS]
         misc = card_fields[russian_tool.MISC]
 
-        if defns_ru != None:
-            str_defns_ru = self.list_to_str(defns_ru)
-            self.scrl_gen_defns_ru.insert(INSERT, str_defns_ru)
         if defns_en != None:
             str_defns_en = self.list_to_str(defns_en)
             self.scrl_gen_defns_en.insert(INSERT, str_defns_en)
@@ -124,8 +120,6 @@ class GUI:
         if examples != None:
             str_examples = self.list_to_str(examples)
             self.scrl_gen_examples.insert(INSERT, str_examples)
-        if imgs_dir != None:
-            str_imgs_dir = str(imgs_dir)
         if synos != None:
             str_synos = self.list_to_str(synos)
             self.scrl_gen_synos.insert(INSERT, str_synos)
